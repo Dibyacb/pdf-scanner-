@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#0D74E7" />
-  <title>scan by PD</title>
+  <title>scan file by priyanto</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -80,7 +80,7 @@
       --crop-canvas-bg: #E2E8F0;
     }
 
-    * {
+- {
       -webkit-tap-highlight-color: transparent;
       box-sizing: border-box;
     }
@@ -545,10 +545,10 @@
   </section>
 
   <!-- ===================================================================== -->
-  <!-- SCREEN 1: MINIMAL HOME SCREEN ("scan by PD")                          -->
+  <!-- SCREEN 1: MINIMAL HOME SCREEN ("scan file by priyanto")               -->
   <!-- ===================================================================== -->
   <section id="screen-1" class="theme-workspace flex h-[100dvh] w-full flex-col justify-between safe-top safe-bottom">
-    <!-- Top Header: Brand Name "scan by PD" + Engine Status + Night/Day Toggle -->
+    <!-- Top Header: Brand Name "scan file by priyanto" + Engine Status + Night/Day Toggle -->
     <header class="flex items-center justify-between px-4 py-3.5">
       <div class="flex items-center gap-2.5">
         <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0D74E7] shadow-md shadow-[#0D74E7]/30">
@@ -559,7 +559,7 @@
             <line x1="8" y1="17" x2="13" y2="17"/>
           </svg>
         </div>
-        <span class="theme-text-primary text-lg font-bold tracking-tight">scan by PD</span>
+        <span class="theme-text-primary text-lg font-bold tracking-tight">scan file by priyanto</span>
       </div>
 
       <div class="flex items-center gap-2">
@@ -589,7 +589,7 @@
             <line x1="4" y1="12" x2="20" y2="12" stroke="#00E676" stroke-width="2.2"/>
           </svg>
         </div>
-        <h1 class="theme-text-primary text-2xl font-bold tracking-tight">scan by PD</h1>
+        <h1 class="theme-text-primary text-2xl font-bold tracking-tight">scan file by priyanto</h1>
         <p class="theme-text-secondary mt-1.5 text-sm">Auto edge-detection, 8-point crop &amp; crisp PDF, JPG or PNG</p>
       </div>
 
@@ -627,7 +627,7 @@
     </main>
 
     <footer class="theme-text-muted py-4 text-center text-[11px]">
-      scan by PD &bull; On-device processing
+      scan file by priyanto &bull; On-device processing
     </footer>
   </section>
 
@@ -1156,8 +1156,8 @@
       'use strict';
 
       /* -------------------------------------------------------------------
-       * 1. APPLICATION STATE & NIGHT / DAY THEME MANAGER
-       * ------------------------------------------------------------------- */
+- 1. APPLICATION STATE & NIGHT / DAY THEME MANAGER
+- ------------------------------------------------------------------- */
       const MAX_IMAGE_DIM = 1900;
 
       const savedTheme = (() => {
@@ -1263,8 +1263,8 @@
       applyTheme(state.theme);
 
       /* -------------------------------------------------------------------
-       * 2. SCREEN ROUTING & UTILITIES
-       * ------------------------------------------------------------------- */
+- 2. SCREEN ROUTING & UTILITIES
+- ------------------------------------------------------------------- */
       const screens = {
         1: $('screen-1'),
         2: $('screen-2'),
@@ -1349,8 +1349,8 @@
       }
 
       /* -------------------------------------------------------------------
-       * 3. OPENCV INITIALIZATION & EDGE DETECTION / PERSPECTIVE WARP
-       * ------------------------------------------------------------------- */
+- 3. OPENCV INITIALIZATION & EDGE DETECTION / PERSPECTIVE WARP
+- ------------------------------------------------------------------- */
       window.handleOpenCvReady = function () {
         state.cvReady = true;
         const dot = $('cv-status-dot');
@@ -1520,8 +1520,8 @@
       }
 
       /* -------------------------------------------------------------------
-       * 4. UPGRADED STUDIO-GRADE DOCUMENT CONTRAST & FILTER ENGINE
-       * ------------------------------------------------------------------- */
+- 4. UPGRADED STUDIO-GRADE DOCUMENT CONTRAST & FILTER ENGINE
+- ------------------------------------------------------------------- */
       const bgCache = new WeakMap();
 
       function boxBlurRGBA(d, w, h, r, passes) {
@@ -1947,8 +1947,8 @@
       }
 
       /* -------------------------------------------------------------------
-       * 5. FILE INGESTION & SINGLE / MULTI CAMERA ENGINE
-       * ------------------------------------------------------------------- */
+- 5. FILE INGESTION & SINGLE / MULTI CAMERA ENGINE
+- ------------------------------------------------------------------- */
       function loadFileAsCanvas(file) {
         return new Promise((resolve, reject) => {
           const url = URL.createObjectURL(file);
@@ -2378,8 +2378,8 @@
       });
 
       /* -------------------------------------------------------------------
-       * 6. UPGRADED SCREEN 2: 8-DOT CROP & ROTATE ENGINE WITH LOUPE
-       * ------------------------------------------------------------------- */
+- 6. UPGRADED SCREEN 2: 8-DOT CROP & ROTATE ENGINE WITH LOUPE
+- ------------------------------------------------------------------- */
       const cropCanvas = $('crop-canvas');
       const cropCtx = cropCanvas.getContext('2d');
 
@@ -2956,8 +2956,8 @@
       }
 
       /* -------------------------------------------------------------------
-       * 7. SCREEN 3: BATCH / SINGLE "ADJUST CONTRAST" & FILTER SCREEN
-       * ------------------------------------------------------------------- */
+- 7. SCREEN 3: BATCH / SINGLE "ADJUST CONTRAST" & FILTER SCREEN
+- ------------------------------------------------------------------- */
       const previewCanvas = $('filter-preview-canvas');
 
       function openFilterScreen() {
@@ -3337,8 +3337,8 @@
       });
 
       /* -------------------------------------------------------------------
-       * 8. SCREEN 4: DOCUMENT PAGE LIST, SMOOTH PAGE PREVIEW & 3s UNDO DELETE
-       * ------------------------------------------------------------------- */
+- 8. SCREEN 4: DOCUMENT PAGE LIST, SMOOTH PAGE PREVIEW & 3s UNDO DELETE
+- ------------------------------------------------------------------- */
       function renderPageList() {
         const listEl = $('pages-sortable-list');
         listEl.innerHTML = '';
@@ -3608,8 +3608,8 @@
       });
 
       /* -------------------------------------------------------------------
-       * 9. SCREEN 5: MULTI-FORMAT (PDF, JPG, PNG) EXPORT, DOWNLOAD & SHARE
-       * ------------------------------------------------------------------- */
+- 9. SCREEN 5: MULTI-FORMAT (PDF, JPG, PNG) EXPORT, DOWNLOAD & SHARE
+- ------------------------------------------------------------------- */
       function dataUrlToBlob(dataUrl, mimeType) {
         const base64 = dataUrl.split(',')[1] || '';
         const binary = atob(base64);
@@ -3838,8 +3838,8 @@
       });
 
       /* -------------------------------------------------------------------
-       * STRICT FILE NAME EXPORT: exact name typed by user for PDF, JPG & PNG
-       * ------------------------------------------------------------------- */
+- STRICT FILE NAME EXPORT: exact name typed by user for PDF, JPG & PNG
+- ------------------------------------------------------------------- */
       function exactBaseName() {
         let n = ($('input-export-filename').value || '');
         n = n.replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '_')
