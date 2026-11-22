@@ -227,7 +227,7 @@
       background: var(--border-subtle);
       border-radius: 999px;
     }
-  
+
     /* ===== Professional UI layer ===== */
     html, body { font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; letter-spacing: -0.005em; }
     header[class*="bg-[#0D74E7]"] { background: linear-gradient(180deg, #1B86F5 0%, #0C66D0 100%) !important; box-shadow: 0 1px 0 rgba(255,255,255,.18) inset, 0 6px 18px rgba(8,60,130,.28) !important; }
@@ -267,6 +267,24 @@
       opacity: 1;
     }
 
+    /* Smooth Camera Mode (Single / Multi) Popout Sheet */
+    #camera-mode-sheet {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    #camera-mode-sheet.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #camera-mode-panel {
+      transform: translateY(24px) scale(0.97);
+      transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    #camera-mode-sheet.is-open #camera-mode-panel {
+      transform: translateY(0) scale(1);
+    }
+
     /* ===== Zoom stage + smoothness ===== */
     #zoom-stage { touch-action: none; user-select: none; -webkit-user-select: none; contain: layout paint; cursor: grab; }
     #zoom-stage:active { cursor: grabbing; }
@@ -289,6 +307,7 @@
   <!-- Hidden File Inputs -->
   <input id="input-upload" type="file" accept="image/jpeg,image/png,image/webp,image/*" multiple class="hidden" />
   <input id="input-camera" type="file" accept="image/*" capture="environment" class="hidden" />
+  <input id="input-camera-multi-fallback" type="file" accept="image/*" capture="environment" class="hidden" />
 
   <!-- Global Loading / Processing Overlay -->
   <div id="global-loader" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm">
@@ -327,6 +346,203 @@
       </div>
     </div>
   </div>
+
+  <!-- ===================================================================== -->
+  <!-- CAMERA MODE POPOUT SHEET: SINGLE vs MULTI ICON OPTION                 -->
+  <!-- ===================================================================== -->
+  <div id="camera-mode-sheet" aria-hidden="true" class="fixed inset-0 z-40 flex flex-col justify-end bg-black/70 backdrop-blur-sm">
+    <div id="camera-mode-backdrop" class="flex-1"></div>
+    <div id="camera-mode-panel" class="theme-sheet mx-auto w-full max-w-lg rounded-t-3xl border-t px-5 pt-3 pb-7 shadow-2xl safe-bottom">
+      <div class="mx-auto mb-3.5 h-1 w-10 rounded-full bg-slate-400/40"></div>
+      <div class="mb-4 flex items-center justify-between">
+        <div>
+          <h3 class="theme-text-primary text-base font-bold">Camera Capture Mode</h3>
+          <p class="theme-text-secondary text-xs">Choose single shot or continuous multi-page scan</p>
+        </div>
+        <button id="btn-cam-mode-close" type="button" aria-label="Close Camera Mode Selector"
+          class="theme-sheet-item theme-text-secondary flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition active:scale-90">
+          &#10005;
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3.5">
+        <!-- Single Capture Icon Option -->
+        <button id="btn-cam-mode-single" type="button"
+          class="theme-sheet-item theme-border group flex flex-col items-center justify-center gap-2.5 rounded-2xl border px-4 py-5 text-center transition-all active:scale-[0.97] hover:border-[#0D74E7]">
+          <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#0D74E7]/15 text-[#0D74E7] transition-colors group-hover:bg-[#0D74E7] group-hover:text-white">
+            <!-- Single Page Camera Icon -->
+            <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="3" width="14" height="18" rx="2.5"/>
+              <circle cx="12" cy="12" r="3"/>
+              <line x1="9" y1="7" x2="15" y2="7"/>
+            </svg>
+          </div>
+          <div>
+            <span class="theme-text-primary block text-sm font-bold">Single</span>
+            <span class="theme-text-secondary mt-0.5 block text-[11px]">1 page &amp; crop</span>
+          </div>
+        </button>
+
+        <!-- Multi Capture Icon Option -->
+        <button id="btn-cam-mode-multi" type="button"
+          class="group relative flex flex-col items-center justify-center gap-2.5 rounded-2xl bg-[#0D74E7] px-4 py-5 text-center text-white shadow-lg shadow-[#0D74E7]/30 transition-all active:scale-[0.97] hover:bg-[#0A5DC2]">
+          <span class="absolute right-2.5 top-2.5 rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white">
+            Batch
+          </span>
+          <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-white">
+            <!-- Stacked Multi-Page Camera Icon -->
+            <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 3h10a2 2 0 0 1 2 2v12"/>
+              <rect x="4" y="6" width="13" height="15" rx="2.2"/>
+              <circle cx="10.5" cy="13.5" r="2.6"/>
+              <line x1="15.5" y1="9.5" x2="15.51" y2="9.5"/>
+            </svg>
+          </div>
+          <div>
+            <span class="block text-sm font-bold">Multi</span>
+            <span class="mt-0.5 block text-[11px] text-white/85">Take pages one by one</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MULTI-CAPTURE FALLBACK MODAL (When Live Viewfinder is Unavailable)    -->
+  <!-- ===================================================================== -->
+  <div id="multi-fallback-modal" class="fixed inset-0 z-40 hidden flex-col justify-between bg-black/90 p-5 text-white backdrop-blur-md safe-top safe-bottom">
+    <div class="flex items-center justify-between">
+      <div>
+        <h3 class="text-base font-bold">Multi-Page Camera</h3>
+        <p id="fallback-count-label" class="text-xs text-white/70">0 pages captured</p>
+      </div>
+      <button id="btn-fallback-cancel" type="button"
+        class="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition active:scale-90">
+        &#10005;
+      </button>
+    </div>
+
+    <div class="my-auto flex flex-col items-center text-center">
+      <div id="fallback-thumb-wrap" class="mb-4 flex h-44 w-36 items-center justify-center overflow-hidden rounded-2xl border border-white/20 bg-white/5 shadow-xl">
+        <span class="px-3 text-xs text-white/50">Ready for Page 1</span>
+      </div>
+      <p class="max-w-xs text-xs text-white/75">
+        Capture pages one after another, then tap <strong class="text-white">Done &amp; Crop</strong> when finished.
+      </p>
+    </div>
+
+    <div class="mx-auto flex w-full max-w-md flex-col gap-3">
+      <button id="btn-fallback-snap" type="button"
+        class="flex w-full items-center justify-center gap-2 rounded-2xl bg-white py-3.5 text-sm font-bold text-slate-900 shadow-lg transition active:scale-[0.98]">
+        <svg class="h-5 w-5 text-[#0D74E7]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        <span id="btn-fallback-snap-label">Take Photo 1</span>
+      </button>
+
+      <button id="btn-fallback-done" type="button" disabled
+        class="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#0D74E7] py-3.5 text-sm font-bold text-white shadow-lg transition active:scale-[0.98] disabled:opacity-40">
+        <span>Done &amp; Crop (0)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- LIVE MULTI-PAGE CAMERA VIEWFINDER OVERLAY                             -->
+  <!-- ===================================================================== -->
+  <section id="screen-camera" class="fixed inset-0 z-40 hidden h-[100dvh] w-full flex-col bg-black text-white safe-top safe-bottom">
+    <!-- Top Camera Control Bar -->
+    <header class="relative z-10 flex h-14 shrink-0 items-center justify-between bg-gradient-to-b from-black/80 to-transparent px-3">
+      <button id="btn-livecam-close" type="button" aria-label="Close Camera"
+        class="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition active:scale-90">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+
+      <!-- Live Multi / Single Mode Pill -->
+      <div class="flex items-center gap-1 rounded-full border border-white/15 bg-black/60 p-1 backdrop-blur-md">
+        <button id="btn-livecam-mode-single" type="button"
+          class="rounded-full px-3 py-1 text-[11px] font-semibold text-white/70 transition">
+          Single
+        </button>
+        <button id="btn-livecam-mode-multi" type="button"
+          class="rounded-full bg-[#0D74E7] px-3 py-1 text-[11px] font-bold text-white shadow-xs transition">
+          Multi
+        </button>
+      </div>
+
+      <button id="btn-livecam-flip" type="button" aria-label="Switch Camera" title="Switch Front / Back Camera"
+        class="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md transition active:scale-90">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4"/>
+          <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Live Video Feed + Framing Guide -->
+    <main class="relative flex-1 overflow-hidden bg-black">
+      <video id="camera-video" autoplay playsinline muted class="h-full w-full object-cover"></video>
+
+      <!-- Subtle Document Alignment Frame Guides -->
+      <div class="pointer-events-none absolute inset-6 flex items-center justify-center">
+        <div class="relative h-full w-full max-w-md rounded-2xl border border-white/20">
+          <span class="absolute -left-0.5 -top-0.5 h-6 w-6 rounded-tl-xl border-l-3 border-t-3 border-[#00E676]"></span>
+          <span class="absolute -right-0.5 -top-0.5 h-6 w-6 rounded-tr-xl border-r-3 border-t-3 border-[#00E676]"></span>
+          <span class="absolute -bottom-0.5 -left-0.5 h-6 w-6 rounded-bl-xl border-b-3 border-l-3 border-[#00E676]"></span>
+          <span class="absolute -bottom-0.5 -right-0.5 h-6 w-6 rounded-br-xl border-b-3 border-r-3 border-[#00E676]"></span>
+        </div>
+      </div>
+
+      <!-- Top Floating Status Pill -->
+      <div class="pointer-events-none absolute left-1/2 top-2 -translate-x-1/2">
+        <span id="livecam-hint-pill" class="rounded-full bg-black/65 px-3.5 py-1 text-[11px] font-medium text-white/95 backdrop-blur-md">
+          Tap shutter to capture pages one by one
+        </span>
+      </div>
+
+      <!-- Shutter Flash Effect -->
+      <div id="camera-flash-overlay" class="pointer-events-none absolute inset-0 bg-white opacity-0 transition-opacity duration-150"></div>
+    </main>
+
+    <!-- Bottom Camera Dock: Captured Stack + Shutter Button + Done -->
+    <footer class="relative z-10 flex shrink-0 items-center justify-between bg-gradient-to-t from-black via-black/90 to-black/65 px-5 py-4">
+      <!-- Left: Captured Pages Stack Thumbnail + Undo Last -->
+      <div class="flex min-w-[92px] items-center gap-2">
+        <div id="livecam-stack-box" class="relative flex h-14 w-11 items-center justify-center overflow-hidden rounded-xl border border-white/25 bg-white/10">
+          <img id="livecam-last-thumb" src="" alt="" class="hidden h-full w-full object-cover" />
+          <span id="livecam-empty-icon" class="text-[10px] font-semibold text-white/45">0</span>
+          <span id="livecam-count-badge" class="hidden absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#00E676] px-1 text-[11px] font-extrabold text-slate-950 shadow">
+            0
+          </span>
+        </div>
+        <button id="btn-livecam-undo" type="button" title="Remove Last Shot"
+          class="hidden flex-col items-center justify-center rounded-lg bg-white/12 px-2 py-1.5 text-[10px] font-semibold text-white/90 transition active:scale-90">
+          <span>Undo</span>
+        </button>
+      </div>
+
+      <!-- Center: Tactile Shutter Trigger -->
+      <button id="btn-livecam-shutter" type="button" aria-label="Capture Photo"
+        class="group relative flex h-[74px] w-[74px] items-center justify-center rounded-full border-4 border-white bg-white/20 p-1 shadow-lg transition active:scale-90">
+        <span class="block h-full w-full rounded-full bg-white transition group-active:bg-[#0D74E7]"></span>
+      </button>
+
+      <!-- Right: Done / Proceed to Crop -->
+      <div class="flex min-w-[92px] justify-end">
+        <button id="btn-livecam-done" type="button" disabled
+          class="flex items-center gap-1.5 rounded-full bg-[#0D74E7] px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-[#0D74E7]/35 transition active:scale-95 disabled:bg-white/15 disabled:text-white/40 disabled:shadow-none">
+          <span id="livecam-done-label">Done</span>
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </button>
+      </div>
+    </footer>
+  </section>
 
   <!-- ===================================================================== -->
   <!-- SCREEN 1: MINIMAL HOME SCREEN ("scan by PD")                          -->
@@ -404,7 +620,7 @@
           </div>
           <div class="text-center">
             <span class="block text-base font-semibold">Camera</span>
-            <span class="mt-0.5 block text-[11px] text-white/80">Capture Pages</span>
+            <span class="mt-0.5 block text-[11px] text-white/80">Single or Multi</span>
           </div>
         </button>
       </div>
@@ -927,6 +1143,13 @@
         docTitle: 'New Document',
         pages: [],
 
+        // Camera Single / Multi State
+        cameraAppendMode: false,
+        cameraCaptureMode: 'MULTI', // 'SINGLE' | 'MULTI'
+        cameraFacingMode: 'environment',
+        cameraStream: null,
+        cameraCaptures: [], // Array of { canvas, thumbUrl }
+
         // Screen 2 Crop Queue State
         cropQueue: [],
         cropQueueIndex: 0,
@@ -1260,12 +1483,6 @@
       /* -------------------------------------------------------------------
        * 4. UPGRADED STUDIO-GRADE DOCUMENT CONTRAST & FILTER ENGINE
        * ------------------------------------------------------------------- */
-
-      /**
-       * Multi-pass 5x5 morphological dilation + smooth Gaussian upscaling.
-       * Bridges across bold text, tables, and shadows so local paper color & lighting
-       * can be divided out cleanly, yielding pure white paper without gray fog.
-       */
       const bgCache = new WeakMap();
 
       function boxBlurRGBA(d, w, h, r, passes) {
@@ -1304,7 +1521,6 @@
 
         let cur = sCtx.getImageData(0, 0, bgW, bgH).data;
 
-        // Two passes of 5x5 morphological max-filter (effective 9x9 radius on grid)
         for (let pass = 0; pass < 2; pass++) {
           const next = new Uint8ClampedArray(cur.length);
           for (let y = 0; y < bgH; y++) {
@@ -1331,7 +1547,7 @@
           cur = next;
         }
 
-        boxBlurRGBA(cur, bgW, bgH, 1, 2); // size-relative smoothing: identical on Safari/Chrome, preview == export
+        boxBlurRGBA(cur, bgW, bgH, 1, 2);
         sCtx.putImageData(new ImageData(cur, bgW, bgH), 0, 0);
 
         const upCanvas = document.createElement('canvas');
@@ -1344,10 +1560,6 @@
         return uCtx.getImageData(0, 0, w, h).data;
       }
 
-      /**
-       * Analyzes background-normalized pixels to find adaptive ink black-point
-       * and paper white-point percentiles for accurate contrast stretching.
-       */
       function analyzeNormalizedHistogram(data, bgMap) {
         const hist = new Uint32Array(256);
         let samples = 0;
@@ -1379,15 +1591,11 @@
           }
         }
 
-        // Keep sensible bounds so blank pages or dark photos don't over-clip
         const inkAnchor = Math.min(115, Math.max(12, p04));
         const paperAnchor = Math.max(205, Math.min(250, p78));
         return { inkAnchor, paperAnchor };
       }
 
-      /**
-       * Fast 3x3 unsharp mask pass for crisp, laser-sharp text strokes
-       */
       function applySharpenPass(ctx, w, h, amount) {
         if (amount <= 0.02) return;
         const srcData = ctx.getImageData(0, 0, w, h);
@@ -1424,11 +1632,6 @@
         ctx.putImageData(dstData, 0, 0);
       }
 
-      /**
-       * Open-source binarization suite (Sauvola 2000, Wolf-Jolion 2004, Bradley-Roth 2007, Otsu 1979)
-       * run on the shadow-normalized luminance (paper = 255) using integral images (O(n)).
-       * Soft Edges appears first and is selected by default when B&W is chosen.
-       */
       const BW_VARIANTS = {
         SOFT:    { n: 'Soft Edges',    algo: 'sauv',  k: 0.20, band: 64, lift: 0.02 },
         SAUVOLA: { n: 'Clean Text',    algo: 'sauv',  k: 0.22, band: 16, lift: 0 },
@@ -1449,7 +1652,6 @@
                  0.114 * Math.min(255, data[i + 2] / bg[i + 2] * 255);
         }
 
-        // Reduced working grid (<=1400px) keeps memory low on phones; thresholds are bilinearly upsampled.
         const S = Math.min(1, 1400 / Math.max(w, h));
         const sw = Math.max(8, Math.round(w * S)), sh = Math.max(8, Math.round(h * S));
         const Ls = new Float32Array(sw * sh);
@@ -1509,7 +1711,7 @@
           }
         }
 
-        const bias = 1 + V.lift + (step - 2) * 0.035;   // higher step = bolder ink
+        const bias = 1 + V.lift + (step - 2) * 0.035;
         const out = new Uint8ClampedArray(N);
         for (let y = 0; y < h; y++) {
           const gy = Math.min(sh - 1.001, Math.max(0, (y + 0.5) * sh / h - 0.5));
@@ -1543,7 +1745,7 @@
         strip.innerHTML = '';
         strip.scrollLeft = 0;
         for (const id of Object.keys(BW_VARIANTS)) {
-          await new Promise((r) => setTimeout(r, 12));       // yield so zoom / pan stay fluid
+          await new Promise((r) => setTimeout(r, 12));
           if (token !== bwToken || state.filterMode !== 'BW') return;
           const thumb = applyDocumentFilter(base, { mode: 'BW', step: state.contrastStep, manual: { ...state.manual, bw: id } });
           const btn = document.createElement('button');
@@ -1562,9 +1764,6 @@
         }
       }
 
-      /**
-       * Applies upgraded PHOTO, MAGIC, B&W, GRAY, or MANUAL filter + 5-step contrast.
-       */
       function applyDocumentFilter(warpedCanvas, options) {
         const {
           mode = state.filterMode,
@@ -1590,13 +1789,12 @@
           if (!c) {
             const bg = computePaperBackground(warpedCanvas, w, h);
             c = { bg, stats: analyzeNormalizedHistogram(data, bg) };
-            if (w * h <= 4.6e6) bgCache.set(warpedCanvas, c); // reuse across steps / samples (preview sizes only)
+            if (w * h <= 4.6e6) bgCache.set(warpedCanvas, c);
           }
           bgMap = c.bg; stats = c.stats;
         }
         const bwMap = (mode === 'BW') ? computeBwMap(data, bgMap, w, h, (manual && manual.bw) || 'SOFT', step) : null;
 
-        // 5-step intensity tables (0 = gentle/soft, 2 = balanced default, 4 = maximum crisp contrast)
         const photoContrastTable = [0.92, 1.02, 1.12, 1.24, 1.38];
         const photoBrightTable   = [-10, 0, 6, 12, 18];
 
@@ -1624,7 +1822,6 @@
             b = (b - 128) * c + 128 + br;
 
           } else if (mode === 'MAGIC') {
-            // 1. Divide out uneven shadows & paper tint
             let nr = (r / bgMap[i]) * 255;
             let ng = (g / bgMap[i + 1]) * 255;
             let nb = (b / bgMap[i + 2]) * 255;
@@ -1633,17 +1830,14 @@
             const whiteCutoff = Math.min(250, Math.max(195, stats.paperAnchor + magicWhiteOffsets[step]));
 
             if (lumNorm >= whiteCutoff) {
-              // Pure snowy white paper background
               r = g = b = 255;
             } else {
-              // Adaptive black-point pull + S-curve contrast so ink is deep & vivid
               const blackShift = stats.inkAnchor * magicBlackPull[step];
               const gain = magicGainTable[step];
 
               const mapChannel = (v) => {
                 let stretched = ((v - blackShift) / Math.max(60, whiteCutoff - blackShift)) * 255;
                 stretched = Math.max(0, Math.min(255, stretched));
-                // Smooth contrast curve
                 return (stretched - 132) * gain + 132;
               };
 
@@ -1651,7 +1845,6 @@
               ng = mapChannel(ng);
               nb = mapChannel(nb);
 
-              // Vibrant ink saturation boost
               const lum = 0.299 * nr + 0.587 * ng + 0.114 * nb;
               const sat = 1.28;
               r = lum + (nr - lum) * sat;
@@ -1663,7 +1856,6 @@
             r = g = b = bwMap[i >> 2];
 
           } else if (mode === 'GRAY') {
-            // Clean Document Grayscale with shadow removal & black/white point stretch
             const nr = (r / bgMap[i]) * 255;
             const ng = (g / bgMap[i + 1]) * 255;
             const nb = (b / bgMap[i + 2]) * 255;
@@ -1704,7 +1896,6 @@
 
         ctx.putImageData(imgData, 0, 0);
 
-        // Crisp detail sharpening pass for document clarity
         if (mode === 'MAGIC') {
           applySharpenPass(ctx, w, h, 0.26);
         } else if (mode === 'GRAY') {
@@ -1717,7 +1908,7 @@
       }
 
       /* -------------------------------------------------------------------
-       * 5. FILE INGESTION (SCREEN 1 & SCREEN 4 '+' ADD)
+       * 5. FILE INGESTION & SINGLE / MULTI CAMERA ENGINE
        * ------------------------------------------------------------------- */
       function loadFileAsCanvas(file) {
         return new Promise((resolve, reject) => {
@@ -1742,17 +1933,15 @@
         });
       }
 
-      async function ingestImageFiles(fileList, appendMode = false) {
-        const files = Array.from(fileList || []).filter((f) => f.type.startsWith('image/'));
-        if (!files.length) return;
+      async function ingestCanvases(canvases, appendMode = false) {
+        if (!canvases || !canvases.length) return;
 
-        showLoader(files.length > 1 ? `Detecting edges on ${files.length} pages...` : 'Detecting document edges...');
+        showLoader(canvases.length > 1 ? `Detecting edges on ${canvases.length} pages...` : 'Detecting document edges...');
         await new Promise((r) => setTimeout(r, 40));
 
         try {
           const newPageIds = [];
-          for (const file of files) {
-            const canvas = await loadFileAsCanvas(file);
+          for (const canvas of canvases) {
             const detected = detectDocumentCorners(canvas);
             const page = {
               id: uid(),
@@ -1787,18 +1976,357 @@
         } catch (err) {
           console.error(err);
           hideLoader();
+          showToast('Could not process one or more images.');
+        }
+      }
+
+      async function ingestImageFiles(fileList, appendMode = false) {
+        const files = Array.from(fileList || []).filter((f) => f.type.startsWith('image/'));
+        if (!files.length) return;
+
+        showLoader(files.length > 1 ? `Loading ${files.length} pages...` : 'Loading image...');
+        try {
+          const canvases = [];
+          for (const file of files) {
+            canvases.push(await loadFileAsCanvas(file));
+          }
+          await ingestCanvases(canvases, appendMode);
+        } catch (err) {
+          console.error(err);
+          hideLoader();
           showToast('Could not load one or more images.');
         }
       }
 
+      /* ---------- Camera Single / Multi Icon Popout Sheet ---------- */
+      function openCameraModeSheet(appendMode) {
+        state.cameraAppendMode = Boolean(appendMode);
+        const sheet = $('camera-mode-sheet');
+        sheet.setAttribute('aria-hidden', 'false');
+        requestAnimationFrame(() => {
+          sheet.classList.add('is-open');
+        });
+      }
+
+      function closeCameraModeSheet() {
+        const sheet = $('camera-mode-sheet');
+        sheet.classList.remove('is-open');
+        sheet.setAttribute('aria-hidden', 'true');
+      }
+
+      $('camera-mode-backdrop').addEventListener('click', closeCameraModeSheet);
+      $('btn-cam-mode-close').addEventListener('click', closeCameraModeSheet);
+
+      // Single Camera Mode Selected
+      $('btn-cam-mode-single').addEventListener('click', () => {
+        closeCameraModeSheet();
+        state.cameraCaptureMode = 'SINGLE';
+        $('input-camera').value = '';
+        $('input-camera').click();
+      });
+
+      // Multi Camera Mode Selected -> Live Continuous Camera with Native Fallback
+      $('btn-cam-mode-multi').addEventListener('click', () => {
+        closeCameraModeSheet();
+        state.cameraCaptureMode = 'MULTI';
+        startMultiCameraSession();
+      });
+
+      /* ---------- Live Continuous Camera Viewfinder ---------- */
+      const cameraVideo = $('camera-video');
+
+      function stopLiveCameraStream() {
+        if (state.cameraStream) {
+          state.cameraStream.getTracks().forEach((track) => {
+            try { track.stop(); } catch (_) {}
+          });
+          state.cameraStream = null;
+        }
+        if (cameraVideo) {
+          cameraVideo.srcObject = null;
+        }
+      }
+
+      function updateLiveCameraModePills() {
+        const isMulti = state.cameraCaptureMode === 'MULTI';
+        const btnSingle = $('btn-livecam-mode-single');
+        const btnMulti = $('btn-livecam-mode-multi');
+        if (isMulti) {
+          btnMulti.className = 'rounded-full bg-[#0D74E7] px-3 py-1 text-[11px] font-bold text-white shadow-xs transition';
+          btnSingle.className = 'rounded-full px-3 py-1 text-[11px] font-semibold text-white/70 transition';
+          $('livecam-hint-pill').textContent = 'Tap shutter to capture pages one by one';
+        } else {
+          btnSingle.className = 'rounded-full bg-[#0D74E7] px-3 py-1 text-[11px] font-bold text-white shadow-xs transition';
+          btnMulti.className = 'rounded-full px-3 py-1 text-[11px] font-semibold text-white/70 transition';
+          $('livecam-hint-pill').textContent = 'Single shot mode · 1 tap captures & crops';
+        }
+      }
+
+      function updateLiveCameraUI() {
+        const count = state.cameraCaptures.length;
+        const thumbImg = $('livecam-last-thumb');
+        const emptyIcon = $('livecam-empty-icon');
+        const countBadge = $('livecam-count-badge');
+        const undoBtn = $('btn-livecam-undo');
+        const doneBtn = $('btn-livecam-done');
+        const doneLabel = $('livecam-done-label');
+
+        if (count > 0) {
+          const last = state.cameraCaptures[count - 1];
+          thumbImg.src = last.thumbUrl;
+          thumbImg.classList.remove('hidden');
+          emptyIcon.classList.add('hidden');
+          countBadge.textContent = String(count);
+          countBadge.classList.remove('hidden');
+          undoBtn.classList.remove('hidden');
+          undoBtn.classList.add('flex');
+          doneBtn.disabled = false;
+          doneLabel.textContent = `Done (${count})`;
+        } else {
+          thumbImg.src = '';
+          thumbImg.classList.add('hidden');
+          emptyIcon.classList.remove('hidden');
+          countBadge.classList.add('hidden');
+          undoBtn.classList.add('hidden');
+          undoBtn.classList.remove('flex');
+          doneBtn.disabled = true;
+          doneLabel.textContent = 'Done';
+        }
+        updateLiveCameraModePills();
+      }
+
+      async function openLiveCameraStream() {
+        stopLiveCameraStream();
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('getUserMedia not supported');
+        }
+        const constraints = {
+          audio: false,
+          video: {
+            facingMode: { ideal: state.cameraFacingMode },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          }
+        };
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        state.cameraStream = stream;
+        cameraVideo.srcObject = stream;
+        await cameraVideo.play();
+      }
+
+      async function startMultiCameraSession() {
+        state.cameraCaptures = [];
+        updateLiveCameraUI();
+
+        try {
+          await openLiveCameraStream();
+          const camScreen = $('screen-camera');
+          camScreen.classList.remove('hidden');
+          camScreen.classList.add('flex');
+        } catch (err) {
+          console.warn('Live viewfinder unavailable, switching to native camera loop:', err);
+          stopLiveCameraStream();
+          openFallbackMultiModal();
+        }
+      }
+
+      function closeLiveCameraScreen() {
+        stopLiveCameraStream();
+        const camScreen = $('screen-camera');
+        camScreen.classList.add('hidden');
+        camScreen.classList.remove('flex');
+      }
+
+      $('btn-livecam-mode-single').addEventListener('click', () => {
+        state.cameraCaptureMode = 'SINGLE';
+        updateLiveCameraModePills();
+      });
+
+      $('btn-livecam-mode-multi').addEventListener('click', () => {
+        state.cameraCaptureMode = 'MULTI';
+        updateLiveCameraModePills();
+      });
+
+      $('btn-livecam-flip').addEventListener('click', async () => {
+        state.cameraFacingMode = state.cameraFacingMode === 'environment' ? 'user' : 'environment';
+        try {
+          await openLiveCameraStream();
+        } catch (err) {
+          console.warn('Could not flip camera:', err);
+          showToast('Only one camera available');
+        }
+      });
+
+      $('btn-livecam-shutter').addEventListener('click', async () => {
+        if (!cameraVideo || cameraVideo.readyState < 2) return;
+
+        // Visual shutter flash + tactile vibration
+        const flash = $('camera-flash-overlay');
+        flash.classList.remove('opacity-0');
+        flash.classList.add('opacity-80');
+        setTimeout(() => {
+          flash.classList.remove('opacity-80');
+          flash.classList.add('opacity-0');
+        }, 110);
+        if (navigator.vibrate) {
+          try { navigator.vibrate(30); } catch (_) {}
+        }
+
+        const vw = cameraVideo.videoWidth || 1280;
+        const vh = cameraVideo.videoHeight || 720;
+        const scale = Math.min(1, MAX_IMAGE_DIM / Math.max(vw, vh));
+        const w = Math.max(1, Math.round(vw * scale));
+        const h = Math.max(1, Math.round(vh * scale));
+
+        const snapCanvas = document.createElement('canvas');
+        snapCanvas.width = w;
+        snapCanvas.height = h;
+        const sCtx = snapCanvas.getContext('2d');
+        if (state.cameraFacingMode === 'user') {
+          sCtx.translate(w, 0);
+          sCtx.scale(-1, 1);
+        }
+        sCtx.drawImage(cameraVideo, 0, 0, w, h);
+
+        // Lightweight thumbnail for instant stack badge
+        const thumbCanvas = document.createElement('canvas');
+        const tScale = Math.min(1, 140 / Math.max(w, h));
+        thumbCanvas.width = Math.max(1, Math.round(w * tScale));
+        thumbCanvas.height = Math.max(1, Math.round(h * tScale));
+        thumbCanvas.getContext('2d').drawImage(snapCanvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
+
+        state.cameraCaptures.push({
+          canvas: snapCanvas,
+          thumbUrl: thumbCanvas.toDataURL('image/jpeg', 0.72)
+        });
+
+        updateLiveCameraUI();
+
+        // If user switched to Single inside the live viewfinder, finish immediately after 1 shot
+        if (state.cameraCaptureMode === 'SINGLE') {
+          const captured = state.cameraCaptures.map((c) => c.canvas);
+          state.cameraCaptures = [];
+          closeLiveCameraScreen();
+          await ingestCanvases(captured, state.cameraAppendMode);
+        } else {
+          showToast(`Page ${state.cameraCaptures.length} captured`);
+        }
+      });
+
+      $('btn-livecam-undo').addEventListener('click', () => {
+        if (!state.cameraCaptures.length) return;
+        state.cameraCaptures.pop();
+        updateLiveCameraUI();
+        showToast('Last shot removed');
+      });
+
+      $('btn-livecam-close').addEventListener('click', () => {
+        if (state.cameraCaptures.length > 0) {
+          const ok = window.confirm(`Discard ${state.cameraCaptures.length} captured ${state.cameraCaptures.length === 1 ? 'photo' : 'photos'}?`);
+          if (!ok) return;
+        }
+        state.cameraCaptures = [];
+        closeLiveCameraScreen();
+      });
+
+      $('btn-livecam-done').addEventListener('click', async () => {
+        if (!state.cameraCaptures.length) return;
+        const captured = state.cameraCaptures.map((c) => c.canvas);
+        state.cameraCaptures = [];
+        closeLiveCameraScreen();
+        await ingestCanvases(captured, state.cameraAppendMode);
+      });
+
+      window.addEventListener('pagehide', stopLiveCameraStream);
+
+      /* ---------- Native Camera Multi-Capture Fallback Loop ---------- */
+      function updateFallbackModalUI() {
+        const count = state.cameraCaptures.length;
+        $('fallback-count-label').textContent = `${count} ${count === 1 ? 'page' : 'pages'} captured`;
+        $('btn-fallback-snap-label').textContent = `Take Photo ${count + 1}`;
+        const doneBtn = $('btn-fallback-done');
+        doneBtn.disabled = count === 0;
+        doneBtn.innerHTML = `<span>Done &amp; Crop (${count})</span>`;
+
+        const wrap = $('fallback-thumb-wrap');
+        if (count > 0) {
+          const last = state.cameraCaptures[count - 1];
+          wrap.innerHTML = `<img src="${last.thumbUrl}" alt="Captured page ${count}" class="h-full w-full object-contain bg-black" />`;
+        } else {
+          wrap.innerHTML = `<span class="px-3 text-xs text-white/50">Ready for Page 1</span>`;
+        }
+      }
+
+      function openFallbackMultiModal() {
+        state.cameraCaptures = [];
+        updateFallbackModalUI();
+        const modal = $('multi-fallback-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        // Trigger first native camera capture immediately on the user's tap gesture
+        $('input-camera-multi-fallback').value = '';
+        $('input-camera-multi-fallback').click();
+      }
+
+      function closeFallbackMultiModal() {
+        const modal = $('multi-fallback-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      $('btn-fallback-snap').addEventListener('click', () => {
+        $('input-camera-multi-fallback').value = '';
+        $('input-camera-multi-fallback').click();
+      });
+
+      $('input-camera-multi-fallback').addEventListener('change', async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        try {
+          const canvas = await loadFileAsCanvas(file);
+          const thumbCanvas = document.createElement('canvas');
+          const tScale = Math.min(1, 240 / Math.max(canvas.width, canvas.height));
+          thumbCanvas.width = Math.max(1, Math.round(canvas.width * tScale));
+          thumbCanvas.height = Math.max(1, Math.round(canvas.height * tScale));
+          thumbCanvas.getContext('2d').drawImage(canvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
+
+          state.cameraCaptures.push({
+            canvas,
+            thumbUrl: thumbCanvas.toDataURL('image/jpeg', 0.78)
+          });
+          updateFallbackModalUI();
+          showToast(`Page ${state.cameraCaptures.length} added`);
+        } catch (err) {
+          console.error(err);
+          showToast('Could not read photo');
+        }
+      });
+
+      $('btn-fallback-cancel').addEventListener('click', () => {
+        if (state.cameraCaptures.length > 0) {
+          const ok = window.confirm(`Discard ${state.cameraCaptures.length} captured ${state.cameraCaptures.length === 1 ? 'photo' : 'photos'}?`);
+          if (!ok) return;
+        }
+        state.cameraCaptures = [];
+        closeFallbackMultiModal();
+      });
+
+      $('btn-fallback-done').addEventListener('click', async () => {
+        if (!state.cameraCaptures.length) return;
+        const captured = state.cameraCaptures.map((c) => c.canvas);
+        state.cameraCaptures = [];
+        closeFallbackMultiModal();
+        await ingestCanvases(captured, state.cameraAppendMode);
+      });
+
+      /* ---------- Home Screen Upload & Camera Triggers ---------- */
       $('btn-home-upload').addEventListener('click', () => {
         $('input-upload').value = '';
         $('input-upload').click();
       });
 
       $('btn-home-camera').addEventListener('click', () => {
-        $('input-camera').value = '';
-        $('input-camera').click();
+        openCameraModeSheet(false);
       });
 
       $('input-upload').addEventListener('change', (e) => {
@@ -1807,8 +2335,7 @@
       });
 
       $('input-camera').addEventListener('change', (e) => {
-        const append = state.currentScreen === 4;
-        ingestImageFiles(e.target.files, append);
+        ingestImageFiles(e.target.files, state.cameraAppendMode);
       });
 
       /* -------------------------------------------------------------------
@@ -1851,10 +2378,6 @@
         lbl.textContent = page.isExpanded ? 'Auto-Crop' : 'Full Image';
       }
 
-      /**
-       * Validates that a 4-point quad [TL, TR, BR, BL] remains strictly convex
-       * and maintains minimum side/diagonal clearance so edges never cross or invert.
-       */
       function isValidQuad(pts) {
         const [p0, p1, p2, p3] = pts;
         const edges = [
@@ -1864,12 +2387,10 @@
           [p3, p0]
         ];
 
-        // Minimum edge length (3.5% of image)
         for (const [a, b] of edges) {
           if (Math.hypot(b.x - a.x, b.y - a.y) < 0.035) return false;
         }
 
-        // Strict clockwise orientation check via 2D cross products
         let sign = 0;
         for (let i = 0; i < 4; i++) {
           const a = pts[i];
@@ -1884,11 +2405,6 @@
         return true;
       }
 
-      /**
-       * Returns all 8 handle coordinates in canvas CSS pixel space:
-       * 0..3 = Corners (TL, TR, BR, BL)
-       * 4..7 = Edge Center Midpoints (Top, Right, Bottom, Left)
-       */
       function getHandlesInCssPixels(normPoints) {
         const { imgX, imgY, imgW, imgH } = cropViewGeom;
         const corners = normPoints.map((p) => ({
@@ -1926,7 +2442,6 @@
         cropCtx.save();
         cropCtx.scale(dpr, dpr);
 
-        // Theme-aware canvas backdrop
         cropCtx.fillStyle = state.theme === 'light' ? '#E2E8F0' : '#000000';
         cropCtx.fillRect(0, 0, cssW, cssH);
 
@@ -1944,13 +2459,11 @@
 
         cropViewGeom = { imgX, imgY, imgW, imgH, dpr };
 
-        // Draw document photo
         cropCtx.drawImage(page.originalCanvas, imgX, imgY, imgW, imgH);
 
         const handles = getHandlesInCssPixels(page.cropPoints);
         const c0 = handles[0], c1 = handles[1], c2 = handles[2], c3 = handles[3];
 
-        // Darken outside the crop polygon using even-odd rule
         cropCtx.save();
         cropCtx.beginPath();
         cropCtx.rect(imgX, imgY, imgW, imgH);
@@ -1963,7 +2476,6 @@
         cropCtx.fill('evenodd');
         cropCtx.restore();
 
-        // Semi-transparent green interior fill
         cropCtx.beginPath();
         cropCtx.moveTo(c0.x, c0.y);
         cropCtx.lineTo(c1.x, c1.y);
@@ -1973,7 +2485,6 @@
         cropCtx.fillStyle = 'rgba(0, 230, 118, 0.16)';
         cropCtx.fill();
 
-        // Alignment 3x3 rule-of-thirds grid while dragging any dot
         if (activeHandleIndex !== -1) {
           cropCtx.save();
           cropCtx.strokeStyle = 'rgba(0, 230, 118, 0.42)';
@@ -1992,7 +2503,6 @@
           cropCtx.restore();
         }
 
-        // Bright green border lines (#00E676)
         cropCtx.beginPath();
         cropCtx.moveTo(c0.x, c0.y);
         cropCtx.lineTo(c1.x, c1.y);
@@ -2003,7 +2513,6 @@
         cropCtx.lineWidth = 2.6;
         cropCtx.stroke();
 
-        // Highlight active edge brightly when dragging a center edge dot (4..7)
         if (activeHandleIndex >= 4) {
           const edgeIdx = activeHandleIndex - 4;
           const eA = handles[edgeIdx];
@@ -2018,7 +2527,6 @@
           cropCtx.restore();
         }
 
-        // Draw All 8 Interactive Handles (4 Corner Dots + 4 Edge Center Dots)
         handles.forEach((hPt, idx) => {
           const isCorner = idx < 4;
           const isActive = idx === activeHandleIndex;
@@ -2045,7 +2553,6 @@
             cropCtx.fillStyle = '#FFFFFF';
             cropCtx.fill();
           } else {
-            // Center Edge Handle: distinct green rounded pill oriented along the edge
             cropCtx.save();
             cropCtx.translate(hPt.x, hPt.y);
             cropCtx.rotate(hPt.angle || 0);
@@ -2068,7 +2575,6 @@
             cropCtx.strokeStyle = '#FFFFFF';
             cropCtx.stroke();
 
-            // Inner grip line
             cropCtx.beginPath();
             cropCtx.moveTo(-5, 0);
             cropCtx.lineTo(5, 0);
@@ -2080,14 +2586,12 @@
           }
         });
 
-        // Precision Magnifier Loupe when actively dragging any of the 8 dots
         if (activeHandleIndex !== -1) {
           const targetHandle = handles[activeHandleIndex];
           const normX = (targetHandle.x - imgX) / imgW;
           const normY = (targetHandle.y - imgY) / imgH;
 
           const loupeR = 46;
-          // Place loupe on opposite horizontal corner from user's finger so finger never blocks it
           const loupeX = targetHandle.x < cssW * 0.5 ? cssW - loupeR - 16 : loupeR + 16;
           const loupeY = loupeR + 16;
 
@@ -2110,7 +2614,6 @@
             loupeX - loupeR, loupeY - loupeR, loupeR * 2, loupeR * 2
           );
 
-          // Crosshair inside loupe
           cropCtx.strokeStyle = '#00E676';
           cropCtx.lineWidth = 1.5;
           cropCtx.beginPath();
@@ -2121,7 +2624,6 @@
           cropCtx.stroke();
           cropCtx.restore();
 
-          // Loupe outer ring
           cropCtx.beginPath();
           cropCtx.arc(loupeX, loupeY, loupeR, 0, Math.PI * 2);
           cropCtx.lineWidth = 3;
@@ -2153,7 +2655,6 @@
         const pt = getPointerCssCoords(evt);
         const handles = getHandlesInCssPixels(page.cropPoints);
 
-        // Generous 52px diameter touch hit-area (radius 26px) for all 8 dots
         const hitRadius = 26;
         let bestIdx = -1;
         let bestDist = hitRadius;
@@ -2191,7 +2692,6 @@
         const { imgX, imgY, imgW, imgH } = cropViewGeom;
 
         if (activeHandleIndex < 4) {
-          // CORNER HANDLE (0..3): Move ONLY this single corner; keep all other 3 corners fixed!
           const candidate = clonePoints(page.cropPoints);
           candidate[activeHandleIndex] = {
             x: clamp01((pt.x - imgX) / imgW),
@@ -2204,7 +2704,6 @@
             updateExpandToggleUI(page);
           }
         } else {
-          // CENTER EDGE HANDLE (4..7): Slide the entire edge (both adjacent corners) perpendicular to the edge!
           const edgeIdx = activeHandleIndex - 4;
           const idxA = edgeIdx;
           const idxB = (edgeIdx + 1) % 4;
@@ -2212,7 +2711,6 @@
           const startA = dragStartPoints[idxA];
           const startB = dragStartPoints[idxB];
 
-          // Edge vector in CSS pixel coordinates
           const ax = startA.x * imgW;
           const ay = startA.y * imgH;
           const bx = startB.x * imgW;
@@ -2223,11 +2721,9 @@
           const edgeLen = Math.hypot(ex, ey);
 
           if (edgeLen > 1) {
-            // Unit normal perpendicular to edge A -> B
             const nx = -ey / edgeLen;
             const ny = ex / edgeLen;
 
-            // Finger displacement in CSS pixels projected onto edge normal
             const dpx = pt.x - dragStartCss.x;
             const dpy = pt.y - dragStartCss.y;
             const slidePx = dpx * nx + dpy * ny;
@@ -2274,7 +2770,6 @@
         if (state.currentScreen === 2) renderCropCanvas();
       });
 
-      // Bottom Bar Left: Discard Current Page
       $('btn-crop-discard').addEventListener('click', () => {
         const page = getCurrentCropPage();
         if (!page) return;
@@ -2308,7 +2803,6 @@
         }
       });
 
-      // Bottom Bar Center: Rotate 90° Clockwise
       $('btn-crop-rotate').addEventListener('click', () => {
         const page = getCurrentCropPage();
         if (!page) return;
@@ -2335,7 +2829,6 @@
         renderCropCanvas();
       });
 
-      // Bottom Bar Right: Expand / Auto-Crop Toggle
       $('btn-crop-expand').addEventListener('click', () => {
         const page = getCurrentCropPage();
         if (!page) return;
@@ -2350,7 +2843,6 @@
         renderCropCanvas();
       });
 
-      // Top Bar Left: Back Arrow on Screen 2
       $('btn-crop-back').addEventListener('click', () => {
         if (state.cropReturnTo === 'SINGLE_RETURN') {
           const page = getCurrentCropPage();
@@ -2375,7 +2867,6 @@
         }
       });
 
-      // Top Bar Right: Confirm Crop (✓)
       $('btn-crop-confirm').addEventListener('click', async () => {
         const page = getCurrentCropPage();
         if (!page) return;
@@ -2489,7 +2980,6 @@
         });
       }
 
-      /* ---------- Zoomable, progressive live preview ---------- */
       const stage = $('zoom-stage'), layer = $('zoom-layer'), badge = $('zoom-badge'), resetBtn = $('zoom-reset');
       const view = { s: 1, tx: 0, ty: 0 };
       const fit = { w: 0, h: 0 };
@@ -2986,7 +3476,6 @@
         const idx = state.pages.findIndex((p) => p.id === pageId);
         if (idx === -1) return;
 
-        // Commit any previous pending deletion before starting a fresh 3s countdown
         commitPendingDelete();
 
         const [deletedPage] = state.pages.splice(idx, 1);
@@ -3067,8 +3556,7 @@
 
       $('btn-add-camera').addEventListener('click', () => {
         closeAddPageSheet();
-        $('input-camera').value = '';
-        $('input-camera').click();
+        openCameraModeSheet(true);
       });
 
       $('btn-list-next').addEventListener('click', async () => {
@@ -3171,10 +3659,10 @@
        * ------------------------------------------------------------------- */
       function exactFileName() {
         let n = ($('input-export-filename').value || '');
-        n = n.replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '_')   // only characters no OS allows
+        n = n.replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '_')
              .trim()
              .replace(/\.pdf$/i, '')
-             .replace(/[\s.]+$/g, '');                      // Windows silently strips trailing dots/spaces
+             .replace(/[\s.]+$/g, '');
         return (n || 'New Document') + '.pdf';
       }
 
@@ -3229,8 +3717,6 @@
         if (!encodedPages) return;
         const fileName = exactFileName();
 
-        // Desktop Chrome/Edge: native Save dialog -> exact name, overwrite allowed, no auto-numbering.
-        // Must be opened first, while the tap is still a valid user gesture.
         let handle = null;
         if (typeof window.showSaveFilePicker === 'function') {
           try {
@@ -3239,8 +3725,8 @@
               types: [{ description: 'PDF document', accept: { 'application/pdf': ['.pdf'] } }]
             });
           } catch (err) {
-            if (err && err.name === 'AbortError') return;   // user cancelled -> save nothing
-            handle = null;                                  // blocked (iframe etc.) -> normal download
+            if (err && err.name === 'AbortError') return;
+            handle = null;
           }
         }
 
@@ -3266,7 +3752,6 @@
         }
       });
 
-      // Phones: the system share sheet ("Save to Files" / "Drive") keeps the exact file name.
       const shareBtn = $('btn-share-pdf');
       (function enableShareIfSupported() {
         try {
@@ -3275,7 +3760,7 @@
             shareBtn.classList.remove('hidden');
             shareBtn.classList.add('flex');
           }
-        } catch (_) { /* not supported */ }
+        } catch (_) {}
       })();
 
       shareBtn.addEventListener('click', async () => {
@@ -3290,7 +3775,7 @@
             hideLoader();
           }
           const file = new File([pdfCache.blob], fileName, { type: 'application/pdf' });
-          await navigator.share({ files: [file] });          // no title/text, so nothing renames the file
+          await navigator.share({ files: [file] });
         } catch (err) {
           hideLoader();
           if (err && err.name === 'AbortError') return;
