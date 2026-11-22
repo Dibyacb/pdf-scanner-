@@ -295,7 +295,7 @@
     #zoom-badge.show { opacity: 1; }
     #zoom-reset { position: absolute; top: 8px; right: 10px; display: none; align-items: center; gap: 5px; padding: 6px 11px; border-radius: 999px; background: rgba(15,23,42,.78); color: #fff; font-size: 11px; font-weight: 600; backdrop-filter: blur(8px); }
     #zoom-reset.show { display: inline-flex; }
-    button, [role="button"], .quality-card, .filter-tab, .swatch-btn, .bw-chip { touch-action: manipulation; }
+    button, [role="button"], .quality-card, .format-card, .filter-tab, .swatch-btn, .bw-chip { touch-action: manipulation; }
     section[id^="screen-"]:not(.hidden) { animation: screenFade .2s ease-out both; }
     @keyframes screenFade { from { opacity: 0; } to { opacity: 1; } }
     .custom-scroll, #bw-strip { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
@@ -590,7 +590,7 @@
           </svg>
         </div>
         <h1 class="theme-text-primary text-2xl font-bold tracking-tight">scan by PD</h1>
-        <p class="theme-text-secondary mt-1.5 text-sm">Auto edge-detection, 8-point crop &amp; crisp PDF filters</p>
+        <p class="theme-text-secondary mt-1.5 text-sm">Auto edge-detection, 8-point crop &amp; crisp PDF, JPG or PNG</p>
       </div>
 
       <!-- ONLY Two Large Prominent Action Buttons -->
@@ -988,7 +988,7 @@
   </section>
 
   <!-- ===================================================================== -->
-  <!-- SCREEN 5: FINAL FILE NAME, SIZE & PDF EXPORT SCREEN                   -->
+  <!-- SCREEN 5: FINAL FILE FORMAT, NAME, SIZE & EXPORT SCREEN               -->
   <!-- ===================================================================== -->
   <section id="screen-5" class="theme-workspace hidden h-[100dvh] w-full flex-col safe-top safe-bottom">
     <!-- Top Material Blue Bar -->
@@ -1001,7 +1001,7 @@
         </svg>
       </button>
 
-      <h2 class="text-base font-semibold text-white">Export PDF</h2>
+      <h2 id="export-header-title" class="text-base font-semibold text-white">Export PDF</h2>
 
       <button type="button" data-theme-toggle aria-label="Toggle Night or Day Mode" title="Switch Night / Day Mode"
         class="flex h-10 w-10 items-center justify-center rounded-full text-white/95 transition active:bg-white/20">
@@ -1011,8 +1011,40 @@
 
     <!-- Export Settings Form -->
     <main class="mx-auto flex w-full max-w-lg flex-1 flex-col justify-between overflow-y-auto px-5 py-6">
-      <div class="space-y-6">
-        <!-- File Name Input with 1-Tap Clear (✕) and Fixed .pdf Badge -->
+      <div class="space-y-5">
+        <!-- Export Format Selector (PDF / JPG / PNG) -->
+        <div>
+          <label class="theme-text-secondary mb-2 block text-xs font-semibold uppercase tracking-wider">
+            Export Format
+          </label>
+          <div id="format-options" class="grid grid-cols-3 gap-2.5">
+            <!-- PDF -->
+            <button type="button" data-format="pdf"
+              class="format-card flex flex-col items-center justify-center gap-1 rounded-xl border border-[#0D74E7] bg-[#0D74E7]/12 px-3 py-3 text-center shadow-xs transition active:scale-[0.97]">
+              <span class="format-badge rounded-md bg-[#0D74E7] px-2 py-0.5 text-[11px] font-bold tracking-wider text-white">PDF</span>
+              <span class="theme-text-primary text-xs font-semibold">Document</span>
+              <span class="theme-text-secondary text-[10px]">Multi-page A4</span>
+            </button>
+
+            <!-- JPG -->
+            <button type="button" data-format="jpg"
+              class="format-card theme-surface flex flex-col items-center justify-center gap-1 rounded-xl border px-3 py-3 text-center shadow-xs transition active:scale-[0.97]">
+              <span class="format-badge theme-sheet-item theme-text-secondary rounded-md px-2 py-0.5 text-[11px] font-bold tracking-wider">JPG</span>
+              <span class="theme-text-primary text-xs font-semibold">JPEG Image</span>
+              <span class="theme-text-secondary text-[10px]">Compact photo</span>
+            </button>
+
+            <!-- PNG -->
+            <button type="button" data-format="png"
+              class="format-card theme-surface flex flex-col items-center justify-center gap-1 rounded-xl border px-3 py-3 text-center shadow-xs transition active:scale-[0.97]">
+              <span class="format-badge theme-sheet-item theme-text-secondary rounded-md px-2 py-0.5 text-[11px] font-bold tracking-wider">PNG</span>
+              <span class="theme-text-primary text-xs font-semibold">PNG Image</span>
+              <span class="theme-text-secondary text-[10px]">Lossless crisp</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- File Name Input with 1-Tap Clear (✕) and Dynamic Extension Badge -->
         <div>
           <label for="input-export-filename" class="theme-text-secondary mb-2 block text-xs font-semibold uppercase tracking-wider">
             File Name
@@ -1026,7 +1058,7 @@
                 &#10005;
               </button>
             </div>
-            <span class="theme-border theme-sheet-item theme-text-secondary border-l px-3.5 py-3.5 text-sm font-semibold">
+            <span id="export-ext-badge" class="theme-border theme-sheet-item theme-text-secondary border-l px-3.5 py-3.5 text-sm font-semibold">
               .pdf
             </span>
           </div>
@@ -1049,7 +1081,7 @@
                 </span>
                 <div>
                   <div class="theme-text-primary text-sm font-semibold">Small (Compressed)</div>
-                  <div class="theme-text-secondary text-xs">Best for quick email &amp; messaging</div>
+                  <div id="quality-desc-small" class="theme-text-secondary text-xs">Best for quick email &amp; messaging</div>
                 </div>
               </div>
               <span id="size-est-small" class="theme-sheet-item theme-text-primary rounded-lg px-2.5 py-1 text-xs font-semibold">
@@ -1066,7 +1098,7 @@
                 </span>
                 <div>
                   <div class="theme-text-primary text-sm font-semibold">Medium (Balanced)</div>
-                  <div class="theme-text-secondary text-xs">Recommended crisp text &amp; compact size</div>
+                  <div id="quality-desc-medium" class="theme-text-secondary text-xs">Recommended crisp text &amp; compact size</div>
                 </div>
               </div>
               <span id="size-est-medium" class="rounded-lg bg-[#0D74E7]/20 px-2.5 py-1 text-xs font-semibold text-[#0D74E7]">
@@ -1083,7 +1115,7 @@
                 </span>
                 <div>
                   <div class="theme-text-primary text-sm font-semibold">Large (High Quality)</div>
-                  <div class="theme-text-secondary text-xs">Maximum detail for printing &amp; archiving</div>
+                  <div id="quality-desc-large" class="theme-text-secondary text-xs">Maximum detail for printing &amp; archiving</div>
                 </div>
               </div>
               <span id="size-est-large" class="theme-sheet-item theme-text-primary rounded-lg px-2.5 py-1 text-xs font-semibold">
@@ -1094,22 +1126,22 @@
         </div>
       </div>
 
-      <!-- Primary Download PDF Button -->
+      <!-- Primary Download & Share Buttons -->
       <div class="pt-6">
-        <button id="btn-download-pdf" type="button"
+        <button id="btn-download-export" type="button"
           class="flex w-full items-center justify-center gap-2.5 rounded-2xl bg-[#0D74E7] py-4 text-base font-bold text-white shadow-lg shadow-[#0D74E7]/30 transition active:scale-[0.98] hover:bg-[#0A5DC2]">
           <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="7 10 12 15 17 10"/>
             <line x1="12" y1="15" x2="12" y2="3"/>
           </svg>
-          <span>Save / Download PDF</span>
+          <span id="download-btn-label">Save / Download PDF</span>
         </button>
-        <button id="btn-share-pdf" type="button"
+        <button id="btn-share-export" type="button"
           class="theme-surface mt-3 hidden w-full items-center justify-center gap-2 rounded-2xl border py-3.5 text-sm font-semibold transition active:scale-[0.98]">
-          Share / Save to Files (keeps exact name)
+          <span id="share-btn-label">Share / Save to Files (keeps exact name)</span>
         </button>
-        <p class="theme-text-muted mt-3 px-2 text-center text-[11px] leading-relaxed">
+        <p id="export-helper-note" class="theme-text-muted mt-3 px-2 text-center text-[11px] leading-relaxed">
           The PDF is saved with exactly the name you typed. If your device shows a number such as &ldquo;(1)&rdquo;, a file with the same name already exists in Downloads &mdash; delete the old one, or use the Save dialog / Share option.
         </p>
       </div>
@@ -1177,11 +1209,12 @@
         pendingDelete: null,
 
         // Screen 5 Export State
-        exportQuality: 'medium',
-        exportBlobs: {
-          small: [],
-          medium: [],
-          large: []
+        exportFormat: 'pdf',      // 'pdf' | 'jpg' | 'png'
+        exportQuality: 'medium',  // 'small' | 'medium' | 'large'
+        exportCache: {
+          pdf: null,
+          jpg: null,
+          png: null
         }
       };
 
@@ -1189,6 +1222,12 @@
         small: 0.45,
         medium: 0.72,
         large: 0.92
+      };
+
+      const PNG_SCALE_DIM = {
+        small: 1000,
+        medium: 1450,
+        large: Infinity
       };
 
       const $ = (id) => document.getElementById(id);
@@ -3569,41 +3608,175 @@
       });
 
       /* -------------------------------------------------------------------
-       * 9. SCREEN 5: FINAL FILE NAME, QUALITY ESTIMATES & JSPDF EXPORT
+       * 9. SCREEN 5: MULTI-FORMAT (PDF, JPG, PNG) EXPORT, DOWNLOAD & SHARE
        * ------------------------------------------------------------------- */
-      async function openExportScreen() {
-        showLoader('Calculating PDF sizes...');
+      function dataUrlToBlob(dataUrl, mimeType) {
+        const base64 = dataUrl.split(',')[1] || '';
+        const binary = atob(base64);
+        const len = binary.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        return new Blob([bytes], { type: mimeType });
+      }
+
+      function getScaledCanvasForPng(srcCanvas, maxDim) {
+        const longest = Math.max(srcCanvas.width, srcCanvas.height);
+        if (!Number.isFinite(maxDim) || longest <= maxDim) {
+          return srcCanvas;
+        }
+        const scale = maxDim / longest;
+        const c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(srcCanvas.width * scale));
+        c.height = Math.max(1, Math.round(srcCanvas.height * scale));
+        const ctx = c.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(srcCanvas, 0, 0, c.width, c.height);
+        return c;
+      }
+
+      async function ensureExportFormatPrepared(format) {
+        if (state.exportCache[format]) {
+          return state.exportCache[format];
+        }
+
+        const labelUpper = format.toUpperCase();
+        showLoader(`Calculating ${labelUpper} sizes...`);
         await new Promise((r) => setTimeout(r, 25));
 
+        const result = {
+          tiers: {
+            small: { items: [], totalBytes: 0, pdfBlob: null },
+            medium: { items: [], totalBytes: 0, pdfBlob: null },
+            large: { items: [], totalBytes: 0, pdfBlob: null }
+          }
+        };
+
+        for (const qKey of ['small', 'medium', 'large']) {
+          const tier = result.tiers[qKey];
+          if (format === 'pdf' || format === 'jpg') {
+            const quality = QUALITY_MAP[qKey];
+            let totalBytes = format === 'pdf' ? 1800 : 0;
+
+            for (const page of state.pages) {
+              const canvas = page.processedCanvas || page.warpedCanvas || page.originalCanvas;
+              const dataUrl = canvas.toDataURL('image/jpeg', quality);
+              const blob = dataUrlToBlob(dataUrl, 'image/jpeg');
+              totalBytes += blob.size + (format === 'pdf' ? 650 : 0);
+              tier.items.push({
+                dataUrl,
+                blob,
+                width: canvas.width,
+                height: canvas.height
+              });
+            }
+            tier.totalBytes = totalBytes;
+          } else if (format === 'png') {
+            const maxDim = PNG_SCALE_DIM[qKey];
+            let totalBytes = 0;
+
+            for (const page of state.pages) {
+              const rawCanvas = page.processedCanvas || page.warpedCanvas || page.originalCanvas;
+              const scaledCanvas = getScaledCanvasForPng(rawCanvas, maxDim);
+              const dataUrl = scaledCanvas.toDataURL('image/png');
+              const blob = dataUrlToBlob(dataUrl, 'image/png');
+              totalBytes += blob.size;
+              tier.items.push({
+                dataUrl,
+                blob,
+                width: scaledCanvas.width,
+                height: scaledCanvas.height
+              });
+            }
+            tier.totalBytes = totalBytes;
+          }
+        }
+
+        state.exportCache[format] = result;
+        hideLoader();
+        return result;
+      }
+
+      function updateExportUIForFormat() {
+        const fmt = state.exportFormat;
+        const upper = fmt.toUpperCase();
+        const pageCount = state.pages.length;
+
+        // 1. Update format cards visual active state
+        document.querySelectorAll('.format-card').forEach((card) => {
+          const active = card.dataset.format === fmt;
+          const badge = card.querySelector('.format-badge');
+          if (active) {
+            card.classList.remove('theme-surface');
+            card.classList.add('border-[#0D74E7]', 'bg-[#0D74E7]/12');
+            badge.classList.remove('theme-sheet-item', 'theme-text-secondary');
+            badge.classList.add('bg-[#0D74E7]', 'text-white');
+          } else {
+            card.classList.add('theme-surface');
+            card.classList.remove('border-[#0D74E7]', 'bg-[#0D74E7]/12');
+            badge.classList.add('theme-sheet-item', 'theme-text-secondary');
+            badge.classList.remove('bg-[#0D74E7]', 'text-white');
+          }
+        });
+
+        // 2. Update header, extension badge, summary, quality descriptions, buttons & helper text
+        $('export-header-title').textContent = `Export ${upper}`;
+        $('export-ext-badge').textContent = `.${fmt}`;
+
+        if (fmt === 'pdf') {
+          $('export-page-summary').textContent = `A4 • ${pageCount} ${pageCount === 1 ? 'page' : 'pages'}`;
+          $('quality-desc-small').textContent = 'Best for quick email & messaging';
+          $('quality-desc-medium').textContent = 'Recommended crisp text & compact size';
+          $('quality-desc-large').textContent = 'Maximum detail for printing & archiving';
+          $('download-btn-label').textContent = 'Save / Download PDF';
+          $('share-btn-label').textContent = 'Share / Save to Files (keeps exact name)';
+          $('export-helper-note').innerHTML =
+            'The PDF is saved with exactly the name you typed. If your device shows a number such as &ldquo;(1)&rdquo;, a file with the same name already exists in Downloads &mdash; delete the old one, or use the Save dialog / Share option.';
+        } else {
+          const pluralSuffix = pageCount > 1 ? ` (${pageCount} ${upper}s)` : '';
+          $('export-page-summary').textContent = `${upper} • ${pageCount} ${pageCount === 1 ? 'image' : 'images'}`;
+          if (fmt === 'png') {
+            $('quality-desc-small').textContent = 'Compact lossless PNG (1000px max edge)';
+            $('quality-desc-medium').textContent = 'Balanced lossless PNG (1450px max edge)';
+            $('quality-desc-large').textContent = 'Full-resolution lossless PNG';
+          } else {
+            $('quality-desc-small').textContent = 'Best for quick email & messaging';
+            $('quality-desc-medium').textContent = 'Recommended crisp text & compact size';
+            $('quality-desc-large').textContent = 'Maximum detail for printing & archiving';
+          }
+          $('download-btn-label').textContent = `Save / Download ${upper}${pluralSuffix}`;
+          $('share-btn-label').textContent =
+            pageCount > 1
+              ? `Share / Save ${pageCount} ${upper} Images`
+              : 'Share / Save to Files (keeps exact name)';
+          $('export-helper-note').innerHTML =
+            pageCount > 1
+              ? `Each page is exported as a separate ${upper} image named &ldquo;&lt;Name&gt; - Page 1.${fmt}&rdquo;, &ldquo;Page 2.${fmt}&rdquo;, etc.`
+              : `The ${upper} image is saved with exactly the name you typed. If your device shows a number such as &ldquo;(1)&rdquo;, a file with the same name already exists in Downloads &mdash; delete the old one, or use the Save dialog / Share option.`;
+        }
+
+        // 3. Populate size badges from prepared cache
+        const cached = state.exportCache[fmt];
+        if (cached) {
+          for (const qKey of ['small', 'medium', 'large']) {
+            $(`size-est-${qKey}`).textContent = formatBytes(cached.tiers[qKey].totalBytes);
+          }
+        }
+      }
+
+      async function openExportScreen() {
         const cleanTitle = ($('input-doc-title-header').value || '').trim() || 'New Document';
         state.docTitle = cleanTitle;
         $('input-export-filename').value = cleanTitle;
-        $('export-page-summary').textContent = `A4 • ${state.pages.length} ${state.pages.length === 1 ? 'page' : 'pages'}`;
 
-        state.exportBlobs = { small: [], medium: [], large: [] };
+        // Reset cache so edits/reorders/new pages are always reflected
+        state.exportCache = { pdf: null, jpg: null, png: null };
 
-        for (const qKey of ['small', 'medium', 'large']) {
-          const quality = QUALITY_MAP[qKey];
-          let totalBytes = 1800;
-
-          for (const page of state.pages) {
-            const canvas = page.processedCanvas || page.warpedCanvas || page.originalCanvas;
-            const dataUrl = canvas.toDataURL('image/jpeg', quality);
-            const base64Len = dataUrl.length - 'data:image/jpeg;base64,'.length;
-            const byteLen = Math.round((base64Len * 3) / 4);
-            totalBytes += byteLen + 650;
-            state.exportBlobs[qKey].push({
-              dataUrl,
-              width: canvas.width,
-              height: canvas.height
-            });
-          }
-
-          $(`size-est-${qKey}`).textContent = formatBytes(totalBytes);
-        }
-
+        await ensureExportFormatPrepared(state.exportFormat);
+        updateExportUIForFormat();
         updateQualitySelectionUI();
-        hideLoader();
         showScreen(5);
       }
 
@@ -3631,6 +3804,16 @@
         });
       }
 
+      document.querySelectorAll('.format-card').forEach((card) => {
+        card.addEventListener('click', async () => {
+          const nextFormat = card.dataset.format;
+          if (!nextFormat || nextFormat === state.exportFormat) return;
+          state.exportFormat = nextFormat;
+          await ensureExportFormatPrepared(nextFormat);
+          updateExportUIForFormat();
+        });
+      });
+
       document.querySelectorAll('.quality-card').forEach((card) => {
         card.addEventListener('click', () => {
           state.exportQuality = card.dataset.quality;
@@ -3655,24 +3838,23 @@
       });
 
       /* -------------------------------------------------------------------
-       * STRICT FILE NAME EXPORT: the exact name the user typed, nothing appended.
+       * STRICT FILE NAME EXPORT: exact name typed by user for PDF, JPG & PNG
        * ------------------------------------------------------------------- */
-      function exactFileName() {
+      function exactBaseName() {
         let n = ($('input-export-filename').value || '');
         n = n.replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '_')
              .trim()
-             .replace(/\.pdf$/i, '')
+             .replace(/\.(pdf|jpe?g|png)$/i, '')
              .replace(/[\s.]+$/g, '');
-        return (n || 'New Document') + '.pdf';
+        return n || 'New Document';
       }
 
-      let pdfCache = null;
-      function buildPdfBlob(encodedPages) {
-        if (pdfCache && pdfCache.src === encodedPages) return pdfCache.blob;
+      function buildPdfBlobForTier(tier) {
+        if (tier.pdfBlob) return tier.pdfBlob;
         const { jsPDF } = window.jspdf;
         let doc = null;
 
-        encodedPages.forEach((item, idx) => {
+        tier.items.forEach((item, idx) => {
           const orientation = item.width > item.height ? 'landscape' : 'portrait';
           if (idx === 0) doc = new jsPDF({ orientation, unit: 'mm', format: 'a4', compress: true });
           else doc.addPage('a4', orientation);
@@ -3687,13 +3869,13 @@
           doc.addImage(item.dataUrl, 'JPEG', (pageW - renderW) / 2, (pageH - renderH) / 2, renderW, renderH, undefined, 'FAST');
         });
 
-        const blob = doc.output('blob');
-        pdfCache = { src: encodedPages, blob };
-        return blob;
+        tier.pdfBlob = doc.output('blob');
+        return tier.pdfBlob;
       }
 
-      function downloadBlobExact(blob, fileName) {
-        const url = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+      function downloadBlobExact(blob, fileName, mimeType) {
+        const typedBlob = blob.type === mimeType ? blob : new Blob([blob], { type: mimeType });
+        const url = URL.createObjectURL(typedBlob);
         const a = document.createElement('a');
         a.href = url;
         a.download = fileName;
@@ -3705,54 +3887,121 @@
         setTimeout(() => URL.revokeObjectURL(url), 60000);
       }
 
-      function getEncodedPagesOrWarn() {
-        const encodedPages = state.exportBlobs[state.exportQuality];
-        if (!encodedPages || !encodedPages.length) { showToast('No pages available to export'); return null; }
-        if (!window.jspdf || !window.jspdf.jsPDF) { showToast('PDF engine still loading, please retry'); return null; }
-        return encodedPages;
+      async function prepareExportFilesList() {
+        const fmt = state.exportFormat;
+        const prepared = await ensureExportFormatPrepared(fmt);
+        const tier = prepared.tiers[state.exportQuality];
+        if (!tier || !tier.items || !tier.items.length) {
+          showToast('No pages available to export');
+          return null;
+        }
+
+        const baseName = exactBaseName();
+
+        if (fmt === 'pdf') {
+          if (!window.jspdf || !window.jspdf.jsPDF) {
+            showToast('PDF engine still loading, please retry');
+            return null;
+          }
+          const blob = buildPdfBlobForTier(tier);
+          return [{
+            name: `${baseName}.pdf`,
+            mime: 'application/pdf',
+            blob,
+            pickerType: { description: 'PDF document', accept: { 'application/pdf': ['.pdf'] } }
+          }];
+        }
+
+        const mime = fmt === 'jpg' ? 'image/jpeg' : 'image/png';
+        const pickerType = fmt === 'jpg'
+          ? { description: 'JPEG image', accept: { 'image/jpeg': ['.jpg', '.jpeg'] } }
+          : { description: 'PNG image', accept: { 'image/png': ['.png'] } };
+
+        if (tier.items.length === 1) {
+          return [{
+            name: `${baseName}.${fmt}`,
+            mime,
+            blob: tier.items[0].blob,
+            pickerType
+          }];
+        }
+
+        const padLen = String(tier.items.length).length;
+        return tier.items.map((item, idx) => {
+          const pageNum = String(idx + 1).padStart(padLen, '0');
+          return {
+            name: `${baseName} - Page ${pageNum}.${fmt}`,
+            mime,
+            blob: item.blob,
+            pickerType
+          };
+        });
       }
 
-      $('btn-download-pdf').addEventListener('click', async () => {
-        const encodedPages = getEncodedPagesOrWarn();
-        if (!encodedPages) return;
-        const fileName = exactFileName();
-
-        let handle = null;
-        if (typeof window.showSaveFilePicker === 'function') {
-          try {
-            handle = await window.showSaveFilePicker({
-              suggestedName: fileName,
-              types: [{ description: 'PDF document', accept: { 'application/pdf': ['.pdf'] } }]
-            });
-          } catch (err) {
-            if (err && err.name === 'AbortError') return;
-            handle = null;
-          }
+      $('btn-download-export').addEventListener('click', async () => {
+        const fmt = state.exportFormat;
+        if (fmt === 'pdf') {
+          showLoader('Generating A4 PDF...');
+          await new Promise((r) => setTimeout(r, 30));
         }
 
-        showLoader('Generating A4 PDF...');
-        await new Promise((r) => setTimeout(r, 30));
+        let files;
         try {
-          const blob = buildPdfBlob(encodedPages);
-          if (handle) {
-            const writable = await handle.createWritable();
-            await writable.write(blob);
-            await writable.close();
-            hideLoader();
-            showToast(`Saved "${handle.name}"`);
-          } else {
-            downloadBlobExact(blob, fileName);
-            hideLoader();
-            showToast(`Download started: "${fileName}"`);
-          }
+          files = await prepareExportFilesList();
         } catch (err) {
-          console.error('PDF export error:', err);
+          console.error('Export preparation error:', err);
           hideLoader();
-          showToast('Failed to generate PDF');
+          showToast(`Failed to generate ${fmt.toUpperCase()}`);
+          return;
         }
+        hideLoader();
+        if (!files || !files.length) return;
+
+        // Single file (PDF or 1-page JPG/PNG): support native Save File Picker when available
+        if (files.length === 1) {
+          const single = files[0];
+          let handle = null;
+          if (typeof window.showSaveFilePicker === 'function') {
+            try {
+              handle = await window.showSaveFilePicker({
+                suggestedName: single.name,
+                types: [single.pickerType]
+              });
+            } catch (err) {
+              if (err && err.name === 'AbortError') return;
+              handle = null;
+            }
+          }
+
+          try {
+            if (handle) {
+              const writable = await handle.createWritable();
+              await writable.write(single.blob);
+              await writable.close();
+              showToast(`Saved "${handle.name}"`);
+            } else {
+              downloadBlobExact(single.blob, single.name, single.mime);
+              showToast(`Download started: "${single.name}"`);
+            }
+          } catch (err) {
+            console.error('Save error:', err);
+            showToast(`Failed to save ${fmt.toUpperCase()}`);
+          }
+          return;
+        }
+
+        // Multiple image files (Multi-page JPG or PNG)
+        for (let i = 0; i < files.length; i++) {
+          const f = files[i];
+          downloadBlobExact(f.blob, f.name, f.mime);
+          if (i < files.length - 1) {
+            await new Promise((r) => setTimeout(r, 180));
+          }
+        }
+        showToast(`Downloaded ${files.length} ${fmt.toUpperCase()} images`);
       });
 
-      const shareBtn = $('btn-share-pdf');
+      const shareBtn = $('btn-share-export');
       (function enableShareIfSupported() {
         try {
           const probe = new File([new Blob(['x'], { type: 'application/pdf' })], 'a.pdf', { type: 'application/pdf' });
@@ -3764,22 +4013,26 @@
       })();
 
       shareBtn.addEventListener('click', async () => {
-        const encodedPages = getEncodedPagesOrWarn();
-        if (!encodedPages) return;
-        const fileName = exactFileName();
+        const fmt = state.exportFormat;
         try {
-          if (!(pdfCache && pdfCache.src === encodedPages)) {
+          if (fmt === 'pdf') {
             showLoader('Generating A4 PDF...');
             await new Promise((r) => setTimeout(r, 30));
-            buildPdfBlob(encodedPages);
-            hideLoader();
           }
-          const file = new File([pdfCache.blob], fileName, { type: 'application/pdf' });
-          await navigator.share({ files: [file] });
+          const exported = await prepareExportFilesList();
+          hideLoader();
+          if (!exported || !exported.length) return;
+
+          const shareFiles = exported.map((f) => new File([f.blob], f.name, { type: f.mime }));
+          if (navigator.canShare && !navigator.canShare({ files: shareFiles })) {
+            showToast(`Device does not support sharing ${fmt.toUpperCase()} files`);
+            return;
+          }
+          await navigator.share({ files: shareFiles });
         } catch (err) {
           hideLoader();
           if (err && err.name === 'AbortError') return;
-          if (err && err.name === 'NotAllowedError') showToast('PDF ready \u2013 tap Share again');
+          if (err && err.name === 'NotAllowedError') showToast(`${fmt.toUpperCase()} ready \u2013 tap Share again`);
           else { console.error(err); showToast('Sharing is not available here'); }
         }
       });
