@@ -4038,5 +4038,38 @@
       });
     })();
   </script>
+  <script>
+  window.addEventListener("load", () => {
+    setTimeout(() => {
+      const nav = performance.getEntriesByType("navigation")[0];
+      const exactLoadMs = nav && nav.loadEventEnd > 0
+        ? Math.round(nav.loadEventEnd - nav.startTime)
+        : Math.round(performance.now());
+
+      const ua = navigator.userAgent;
+      let os = "Desktop";
+      if (/Android/i.test(ua)) os = "Android";
+      else if (/iPhone/i.test(ua)) os = "iPhone";
+      else if (/iPad/i.test(ua)) os = "iPad";
+      else if (/Windows/i.test(ua)) os = "Windows PC";
+      else if (/Mac/i.test(ua)) os = "Mac";
+
+      let browser = "Browser";
+      if (/Edg/i.test(ua)) browser = "Edge";
+      else if (/Chrome/i.test(ua)) browser = "Chrome";
+      else if (/Safari/i.test(ua)) browser = "Safari";
+      else if (/Firefox/i.test(ua)) browser = "Firefox";
+
+      const payload = JSON.stringify({
+        website: window.location.hostname,
+        path: window.location.pathname,
+        loadTimeMs: exactLoadMs,
+        deviceInfo: `${os} (${browser})`
+      });
+
+      navigator.sendBeacon("https://site-tracker.dibbo-info.workers.dev", payload);
+    }, 50);
+  });
+</script>
 </body>
 </html>
