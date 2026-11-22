@@ -247,6 +247,26 @@
     .bw-chip canvas { width: 100%; height: 64px; object-fit: cover; border-radius: 9px; background: #fff; display: block; }
     .bw-chip span { display: block; margin-top: 4px; font-size: 10px; font-weight: 600; line-height: 1.2; }
 
+    /* Smooth Page Preview Modal (Screen 4) */
+    #page-preview-modal {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    #page-preview-modal.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #page-preview-panel {
+      transform: translateY(18px) scale(0.96);
+      opacity: 0;
+      transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease;
+    }
+    #page-preview-modal.is-open #page-preview-panel {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
     /* ===== Zoom stage + smoothness ===== */
     #zoom-stage { touch-action: none; user-select: none; -webkit-user-select: none; contain: layout paint; cursor: grab; }
     #zoom-stage:active { cursor: grabbing; }
@@ -281,6 +301,31 @@
   <!-- Toast Notification -->
   <div id="toast" class="pointer-events-none fixed left-1/2 top-16 z-50 -translate-x-1/2 opacity-0 transition-all duration-200">
     <div id="toast-msg" class="rounded-full bg-[#1E293B] border border-white/15 px-4 py-2 text-xs font-medium text-white shadow-lg"></div>
+  </div>
+
+  <!-- 3-Second Countdown Undo Banner (Triggered on Page Delete) -->
+  <div id="undo-delete-banner" class="pointer-events-none fixed bottom-5 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 translate-y-4 opacity-0 transition-all duration-200 safe-bottom">
+    <div class="overflow-hidden rounded-2xl border border-white/15 bg-[#0F172A]/95 text-white shadow-2xl backdrop-blur-md">
+      <div class="flex items-center justify-between gap-3 px-4 py-3">
+        <div class="flex min-w-0 items-center gap-2.5">
+          <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-red-500/20 text-red-400">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+          </span>
+          <span id="undo-delete-label" class="truncate text-xs font-medium text-white/95">Page deleted</span>
+          <span id="undo-countdown-text" class="shrink-0 rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-bold tabular-nums text-white/85">3s</span>
+        </div>
+        <button id="btn-undo-delete" type="button"
+          class="shrink-0 rounded-xl bg-[#0D74E7] px-3.5 py-1.5 text-xs font-bold text-white shadow-sm transition active:scale-95 hover:bg-[#0A5DC2]">
+          Undo
+        </button>
+      </div>
+      <div class="h-1 w-full bg-white/10">
+        <div id="undo-progress-bar" class="h-full bg-[#0D74E7] transition-[width] duration-100 ease-linear" style="width: 100%;"></div>
+      </div>
+    </div>
   </div>
 
   <!-- ===================================================================== -->
@@ -612,7 +657,7 @@
       <div class="mx-auto w-full max-w-2xl pb-24">
         <div class="theme-border theme-text-secondary flex items-center justify-between border-b px-4 py-2.5 text-xs">
           <span id="page-count-label">0 Pages</span>
-          <span>Tap thumbnail to edit &bull; Drag &equiv; to reorder</span>
+          <span>Tap page to preview &bull; Drag &equiv; to reorder</span>
         </div>
 
         <ul id="pages-sortable-list" class="theme-divide divide-y">
@@ -630,38 +675,45 @@
       </button>
     </main>
 
-    <!-- Bottom Sheet Modal: Tap Page to Edit -->
-    <div id="page-action-sheet" class="fixed inset-0 z-40 hidden flex-col justify-end bg-black/70 backdrop-blur-sm">
-      <div id="page-action-backdrop" class="flex-1"></div>
-      <div class="theme-sheet mx-auto w-full max-w-lg rounded-t-3xl border-t px-5 pt-3 pb-7 shadow-2xl">
-        <div class="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-400/40"></div>
-        <div class="mb-4 flex items-center justify-between">
-          <h3 id="sheet-page-title" class="theme-text-primary text-base font-semibold">Page 1 Options</h3>
-          <button id="btn-sheet-close" type="button" class="theme-text-secondary rounded-full p-1.5">
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+    <!-- Smooth Full Page Preview Modal + Bottom Action Buttons (Re-crop, Adjust Contrast, Delete) -->
+    <div id="page-preview-modal" aria-hidden="true" class="fixed inset-0 z-40 flex flex-col bg-black/80 backdrop-blur-md safe-top safe-bottom">
+      <div id="page-preview-panel" class="mx-auto flex h-full w-full max-w-xl flex-col px-4 pt-3 pb-5">
+        <!-- Preview Top Bar -->
+        <div class="flex shrink-0 items-center justify-between pb-3">
+          <div class="flex items-center gap-2.5">
+            <h3 id="preview-modal-title" class="text-base font-bold text-white">Page 1</h3>
+            <span id="preview-modal-badge" class="rounded-md bg-white/15 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-white/90">MAGIC</span>
+          </div>
+          <button id="btn-preview-close" type="button" aria-label="Close Preview"
+            class="flex h-9 w-9 items-center justify-center rounded-full bg-white/12 text-white transition active:scale-90 hover:bg-white/20">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"/>
               <line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
         </div>
 
-        <div class="space-y-2">
-          <button id="btn-sheet-recrop" type="button"
-            class="theme-sheet-item flex w-full items-center gap-3.5 rounded-xl px-4 py-3.5 text-left text-sm font-medium transition active:opacity-80">
+        <!-- Smoothly Centered Page Image Preview -->
+        <div id="page-preview-backdrop" class="flex min-h-0 flex-1 items-center justify-center overflow-hidden py-1">
+          <img id="page-preview-img" src="" alt="Page preview"
+            class="max-h-full max-w-full rounded-xl bg-white object-contain shadow-[0_20px_55px_rgba(0,0,0,0.65)] ring-1 ring-white/15" />
+        </div>
+
+        <!-- Bottom Action Bar Directly Under Page Preview -->
+        <div class="theme-sheet theme-border mt-4 grid shrink-0 grid-cols-3 gap-2.5 rounded-2xl border p-2.5 shadow-2xl">
+          <button id="btn-preview-recrop" type="button"
+            class="theme-sheet-item flex flex-col items-center justify-center gap-1.5 rounded-xl px-2 py-3 text-center transition active:scale-95">
             <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#0D74E7]/15 text-[#0D74E7]">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M6.13 1L6 16a2 2 0 0 0 2 2h15"/>
                 <path d="M1 6.13L16 6a2 2 0 0 1 2 2v15"/>
               </svg>
             </span>
-            <div>
-              <div class="theme-text-primary font-semibold">Re-Crop Page</div>
-              <div class="theme-text-secondary text-xs">Adjust 8-point edges or rotation</div>
-            </div>
+            <span class="theme-text-primary text-xs font-semibold">Re-crop</span>
           </button>
 
-          <button id="btn-sheet-filter" type="button"
-            class="theme-sheet-item flex w-full items-center gap-3.5 rounded-xl px-4 py-3.5 text-left text-sm font-medium transition active:opacity-80">
+          <button id="btn-preview-filter" type="button"
+            class="theme-sheet-item flex flex-col items-center justify-center gap-1.5 rounded-xl px-2 py-3 text-center transition active:scale-95">
             <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-500">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="5"/>
@@ -673,24 +725,18 @@
                 <line x1="21" y1="12" x2="23" y2="12"/>
               </svg>
             </span>
-            <div>
-              <div class="theme-text-primary font-semibold">Adjust Contrast &amp; Filter</div>
-              <div class="theme-text-secondary text-xs">Magic Color, B&amp;W, Grayscale or Manual</div>
-            </div>
+            <span class="theme-text-primary text-xs font-semibold">Adjust Contrast</span>
           </button>
 
-          <button id="btn-sheet-delete" type="button"
-            class="flex w-full items-center gap-3.5 rounded-xl bg-red-500/12 px-4 py-3.5 text-left text-sm font-medium text-red-500 transition active:bg-red-500/20">
+          <button id="btn-preview-delete" type="button"
+            class="flex flex-col items-center justify-center gap-1.5 rounded-xl bg-red-500/12 px-2 py-3 text-center text-red-500 transition active:scale-95 active:bg-red-500/20">
             <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500/20 text-red-500">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="3 6 5 6 21 6"/>
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
               </svg>
             </span>
-            <div>
-              <div class="font-semibold">Delete Page</div>
-              <div class="text-xs text-red-500/75">Remove this page from document</div>
-            </div>
+            <span class="text-xs font-semibold">Delete</span>
           </button>
         </div>
       </div>
@@ -893,7 +939,8 @@
         manual: {
           contrast: 140,   // %
           brightness: 12,  // -80..80
-          sharpness: 45    // 0..100
+          sharpness: 45,   // 0..100
+          bw: 'SOFT'
         },
         filterContext: {
           mode: 'BATCH',   // 'BATCH' | 'SINGLE'
@@ -901,9 +948,10 @@
           previewPageId: null
         },
 
-        // Screen 4 Bottom Sheet State
+        // Screen 4 Page Preview & Undo Delete State
         sheetPageId: null,
         sortableInstance: null,
+        pendingDelete: null,
 
         // Screen 5 Export State
         exportQuality: 'medium',
@@ -1297,30 +1345,6 @@
       }
 
       /**
-       * Computes a fine local-neighborhood luminance average for adaptive B&W thresholding
-       * so faint pencil/ballpoint ink in shadowed areas stays razor-sharp.
-       */
-      function computeLocalLuminanceMap(srcCanvas, w, h) {
-        const scale = Math.min(1, 320 / Math.max(w, h));
-        const lw = Math.max(32, Math.round(w * scale));
-        const lh = Math.max(32, Math.round(h * scale));
-
-        const small = document.createElement('canvas');
-        small.width = lw;
-        small.height = lh;
-        const sCtx = small.getContext('2d');
-        sCtx.filter = 'blur(3px)';
-        sCtx.drawImage(srcCanvas, 0, 0, lw, lh);
-
-        const up = document.createElement('canvas');
-        up.width = w;
-        up.height = h;
-        const uCtx = up.getContext('2d', { willReadFrequently: true });
-        uCtx.drawImage(small, 0, 0, w, h);
-        return uCtx.getImageData(0, 0, w, h).data;
-      }
-
-      /**
        * Analyzes background-normalized pixels to find adaptive ink black-point
        * and paper white-point percentiles for accurate contrast stretching.
        */
@@ -1403,19 +1427,20 @@
       /**
        * Open-source binarization suite (Sauvola 2000, Wolf-Jolion 2004, Bradley-Roth 2007, Otsu 1979)
        * run on the shadow-normalized luminance (paper = 255) using integral images (O(n)).
+       * Soft Edges appears first and is selected by default when B&W is chosen.
        */
       const BW_VARIANTS = {
+        SOFT:    { n: 'Soft Edges',    algo: 'sauv',  k: 0.20, band: 64, lift: 0.02 },
         SAUVOLA: { n: 'Clean Text',    algo: 'sauv',  k: 0.22, band: 16, lift: 0 },
         BOLD:    { n: 'Bold Ink',      algo: 'sauv',  k: 0.28, band: 14, lift: 0.08 },
         FAINT:   { n: 'Pencil / Faint', algo: 'sauv', k: 0.10, band: 20, lift: 0.05 },
         WOLF:    { n: 'Faded Print',   algo: 'wolf',  a: 0.5,  band: 18, lift: 0 },
         BRADLEY: { n: 'Fast Adaptive', algo: 'mean',  t: 0.12, band: 12, lift: 0 },
-        OTSU:    { n: 'Global (Otsu)', algo: 'otsu',  band: 10, lift: 0 },
-        SOFT:    { n: 'Soft Edges',    algo: 'sauv',  k: 0.20, band: 64, lift: 0.02 }
+        OTSU:    { n: 'Global (Otsu)', algo: 'otsu',  band: 10, lift: 0 }
       };
 
       function computeBwMap(data, bg, w, h, id, step) {
-        const V = BW_VARIANTS[id] || BW_VARIANTS.SAUVOLA;
+        const V = BW_VARIANTS[id] || BW_VARIANTS.SOFT;
         const N = w * h;
         const L = new Float32Array(N);
         for (let p = 0, i = 0; p < N; p++, i += 4) {
@@ -1514,8 +1539,9 @@
         const base = document.createElement('canvas');
         base.width = tw; base.height = th;
         base.getContext('2d').drawImage(src, src.width * 0.25, src.height * 0.22, cw, ch, 0, 0, tw, th);
-        const cur = (state.manual && state.manual.bw) || 'SAUVOLA';
+        const cur = (state.manual && state.manual.bw) || 'SOFT';
         strip.innerHTML = '';
+        strip.scrollLeft = 0;
         for (const id of Object.keys(BW_VARIANTS)) {
           await new Promise((r) => setTimeout(r, 12));       // yield so zoom / pan stay fluid
           if (token !== bwToken || state.filterMode !== 'BW') return;
@@ -1568,7 +1594,7 @@
           }
           bgMap = c.bg; stats = c.stats;
         }
-        const bwMap = (mode === 'BW') ? computeBwMap(data, bgMap, w, h, (manual && manual.bw) || 'SAUVOLA', step) : null;
+        const bwMap = (mode === 'BW') ? computeBwMap(data, bgMap, w, h, (manual && manual.bw) || 'SOFT', step) : null;
 
         // 5-step intensity tables (0 = gentle/soft, 2 = balanced default, 4 = maximum crisp contrast)
         const photoContrastTable = [0.92, 1.02, 1.12, 1.24, 1.38];
@@ -1578,7 +1604,6 @@
         const magicWhiteOffsets  = [10, 4, -2, -10, -18];
         const magicBlackPull     = [0.15, 0.30, 0.45, 0.60, 0.75];
 
-        const bwThreshOffsets    = [-20, -10, 0, 11, 22];
         const grayContrastTable  = [1.18, 1.36, 1.56, 1.78, 2.02];
         const grayWhiteOffsets   = [10, 4, -2, -9, -16];
 
@@ -1738,7 +1763,7 @@
               warpedCanvas: null,
               filterMode: 'MAGIC',
               contrastStep: 2,
-              manual: { contrast: 140, brightness: 12, sharpness: 45 },
+              manual: { contrast: 140, brightness: 12, sharpness: 45, bw: 'SOFT' },
               processedCanvas: null,
               processedDataUrl: null
             };
@@ -2396,6 +2421,7 @@
         };
         state.filterMode = 'MAGIC';
         state.contrastStep = 2;
+        state.manual = { ...state.manual, bw: 'SOFT' };
         openFilterScreen();
       }
 
@@ -2684,7 +2710,11 @@
 
       document.querySelectorAll('.filter-tab').forEach((btn) => {
         btn.addEventListener('click', () => {
-          state.filterMode = btn.dataset.mode;
+          const nextMode = btn.dataset.mode;
+          if (nextMode === 'BW' && state.filterMode !== 'BW') {
+            state.manual = { ...state.manual, bw: 'SOFT' };
+          }
+          state.filterMode = nextMode;
           updateFilterModeUI();
           renderFilterPreview();
         });
@@ -2778,7 +2808,7 @@
       });
 
       /* -------------------------------------------------------------------
-       * 8. SCREEN 4: DOCUMENT PAGE LIST & TOUCH REORDER (SORTABLEJS)
+       * 8. SCREEN 4: DOCUMENT PAGE LIST, SMOOTH PAGE PREVIEW & 3s UNDO DELETE
        * ------------------------------------------------------------------- */
       function renderPageList() {
         const listEl = $('pages-sortable-list');
@@ -2796,7 +2826,7 @@
               <span class="page-index-badge theme-text-primary w-7 shrink-0 text-center text-base font-bold">
                 ${index + 1}
               </span>
-              <button type="button" class="thumb-trigger theme-surface group relative flex h-24 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border shadow-sm active:scale-95 transition-transform" aria-label="Edit Page ${index + 1}">
+              <button type="button" class="thumb-trigger theme-surface group relative flex h-24 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border shadow-sm active:scale-95 transition-transform" aria-label="Preview Page ${index + 1}">
                 <img src="${page.processedDataUrl}" alt="Page ${index + 1}" class="h-full w-full object-contain" />
                 <span class="absolute bottom-1 right-1 rounded bg-black/75 px-1.5 py-0.5 text-[9px] font-semibold text-white">
                   ${page.filterMode}
@@ -2807,7 +2837,7 @@
                 <div class="theme-text-secondary mt-0.5 text-xs">
                   ${page.processedCanvas ? `${page.processedCanvas.width} &times; ${page.processedCanvas.height} px` : 'Ready'}
                 </div>
-                <div class="mt-1 inline-block text-[11px] font-medium text-[#0D74E7]">Tap to edit</div>
+                <div class="mt-1 inline-block text-[11px] font-medium text-[#0D74E7]">Tap to preview &amp; edit</div>
               </div>
             </div>
 
@@ -2821,7 +2851,7 @@
           `;
 
           li.querySelectorAll('.thumb-trigger').forEach((el) => {
-            el.addEventListener('click', () => openPageActionSheet(page.id));
+            el.addEventListener('click', () => openPagePreviewModal(page.id));
           });
 
           listEl.appendChild(li);
@@ -2863,30 +2893,44 @@
           const ok = window.confirm('Return to Home? Your current scanned pages will be cleared.');
           if (!ok) return;
         }
+        commitPendingDelete();
         state.pages = [];
         showScreen(1);
       });
 
-      function openPageActionSheet(pageId) {
+      function openPagePreviewModal(pageId) {
         const idx = state.pages.findIndex((p) => p.id === pageId);
         if (idx === -1) return;
+        const page = state.pages[idx];
+
         state.sheetPageId = pageId;
-        $('sheet-page-title').textContent = `Page ${idx + 1} Options`;
-        $('page-action-sheet').classList.remove('hidden');
-        $('page-action-sheet').classList.add('flex');
+        $('preview-modal-title').textContent = `Page ${idx + 1} of ${state.pages.length}`;
+        $('preview-modal-badge').textContent = page.filterMode;
+        $('page-preview-img').src = page.processedDataUrl;
+
+        const modal = $('page-preview-modal');
+        modal.setAttribute('aria-hidden', 'false');
+        requestAnimationFrame(() => {
+          modal.classList.add('is-open');
+        });
       }
 
-      function closePageActionSheet() {
-        $('page-action-sheet').classList.add('hidden');
-        $('page-action-sheet').classList.remove('flex');
+      function closePagePreviewModal() {
+        const modal = $('page-preview-modal');
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
       }
 
-      $('page-action-backdrop').addEventListener('click', closePageActionSheet);
-      $('btn-sheet-close').addEventListener('click', closePageActionSheet);
+      $('page-preview-backdrop').addEventListener('click', (e) => {
+        if (e.target === $('page-preview-backdrop')) {
+          closePagePreviewModal();
+        }
+      });
+      $('btn-preview-close').addEventListener('click', closePagePreviewModal);
 
-      $('btn-sheet-recrop').addEventListener('click', () => {
+      $('btn-preview-recrop').addEventListener('click', () => {
         const page = state.pages.find((p) => p.id === state.sheetPageId);
-        closePageActionSheet();
+        closePagePreviewModal();
         if (!page) return;
 
         const backupCanvas = document.createElement('canvas');
@@ -2906,9 +2950,9 @@
         openCropScreenForCurrentIndex();
       });
 
-      $('btn-sheet-filter').addEventListener('click', () => {
+      $('btn-preview-filter').addEventListener('click', () => {
         const page = state.pages.find((p) => p.id === state.sheetPageId);
-        closePageActionSheet();
+        closePagePreviewModal();
         if (!page) return;
 
         state.filterContext = {
@@ -2922,20 +2966,88 @@
         openFilterScreen();
       });
 
-      $('btn-sheet-delete').addEventListener('click', () => {
-        const pageId = state.sheetPageId;
-        closePageActionSheet();
-        state.pages = state.pages.filter((p) => p.id !== pageId);
-        showToast('Page deleted');
+      /* ---------- 3-Second Countdown Undo Delete ---------- */
+      const UNDO_DURATION_MS = 3000;
+
+      function hideUndoBanner() {
+        const banner = $('undo-delete-banner');
+        banner.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+        banner.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+      }
+
+      function commitPendingDelete() {
+        if (!state.pendingDelete) return;
+        clearInterval(state.pendingDelete.intervalId);
+        state.pendingDelete = null;
+        hideUndoBanner();
+      }
+
+      function triggerDeleteWithUndo(pageId) {
+        const idx = state.pages.findIndex((p) => p.id === pageId);
+        if (idx === -1) return;
+
+        // Commit any previous pending deletion before starting a fresh 3s countdown
+        commitPendingDelete();
+
+        const [deletedPage] = state.pages.splice(idx, 1);
+        const pageNum = idx + 1;
+
+        $('undo-delete-label').textContent = `Page ${pageNum} deleted`;
+        $('undo-countdown-text').textContent = '3s';
+        $('undo-progress-bar').style.width = '100%';
+
+        const banner = $('undo-delete-banner');
+        banner.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+        banner.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+
+        const startedAt = performance.now();
+        const intervalId = setInterval(() => {
+          const elapsed = performance.now() - startedAt;
+          const remainingMs = Math.max(0, UNDO_DURATION_MS - elapsed);
+          const secsLeft = Math.ceil(remainingMs / 1000);
+          $('undo-countdown-text').textContent = `${secsLeft}s`;
+          $('undo-progress-bar').style.width = `${(remainingMs / UNDO_DURATION_MS) * 100}%`;
+
+          if (remainingMs <= 0) {
+            commitPendingDelete();
+          }
+        }, 80);
+
+        state.pendingDelete = {
+          page: deletedPage,
+          index: idx,
+          intervalId
+        };
 
         if (state.pages.length === 0) {
           showScreen(1);
         } else {
           renderPageList();
         }
+      }
+
+      $('btn-undo-delete').addEventListener('click', () => {
+        if (!state.pendingDelete) return;
+        const { page, index, intervalId } = state.pendingDelete;
+        clearInterval(intervalId);
+        state.pendingDelete = null;
+        hideUndoBanner();
+
+        const insertAt = Math.min(index, state.pages.length);
+        state.pages.splice(insertAt, 0, page);
+        renderPageList();
+        showScreen(4);
+        showToast('Page restored');
+      });
+
+      $('btn-preview-delete').addEventListener('click', () => {
+        const pageId = state.sheetPageId;
+        closePagePreviewModal();
+        triggerDeleteWithUndo(pageId);
       });
 
       $('btn-fab-add').addEventListener('click', () => {
+        commitPendingDelete();
         $('add-page-sheet').classList.remove('hidden');
         $('add-page-sheet').classList.add('flex');
       });
@@ -2960,6 +3072,7 @@
       });
 
       $('btn-list-next').addEventListener('click', async () => {
+        commitPendingDelete();
         if (!state.pages.length) {
           showToast('Add at least one page first');
           return;
