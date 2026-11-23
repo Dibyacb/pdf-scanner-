@@ -80,7 +80,7 @@
       --crop-canvas-bg: #E2E8F0;
     }
 
-    * {
+- {
       -webkit-tap-highlight-color: transparent;
       box-sizing: border-box;
     }
@@ -1012,7 +1012,7 @@
     <!-- Export Settings Form -->
     <main class="mx-auto flex w-full max-w-lg flex-1 flex-col justify-between overflow-y-auto px-5 py-6">
       <div class="space-y-5">
-        <!-- Export Format Selector (PDF / JPG / PNG) -->
+        <!-- Export Format Selector (PDF / JPEG Image / PNG Image) -->
         <div>
           <label class="theme-text-secondary mb-2 block text-xs font-semibold uppercase tracking-wider">
             Export Format
@@ -1020,26 +1020,23 @@
           <div id="format-options" class="grid grid-cols-3 gap-2.5">
             <!-- PDF -->
             <button type="button" data-format="pdf"
-              class="format-card flex flex-col items-center justify-center gap-1 rounded-xl border border-[#0D74E7] bg-[#0D74E7]/12 px-3 py-3 text-center shadow-xs transition active:scale-[0.97]">
+              class="format-card flex flex-col items-center justify-center gap-1.5 rounded-xl border border-[#0D74E7] bg-[#0D74E7]/12 px-3 py-3.5 text-center shadow-xs transition active:scale-[0.97]">
               <span class="format-badge rounded-md bg-[#0D74E7] px-2 py-0.5 text-[11px] font-bold tracking-wider text-white">PDF</span>
-              <span class="theme-text-primary text-xs font-semibold">Document</span>
-              <span class="theme-text-secondary text-[10px]">Multi-page A4</span>
+              <span class="theme-text-primary text-xs font-semibold">PDF</span>
             </button>
 
             <!-- JPG -->
             <button type="button" data-format="jpg"
-              class="format-card theme-surface flex flex-col items-center justify-center gap-1 rounded-xl border px-3 py-3 text-center shadow-xs transition active:scale-[0.97]">
+              class="format-card theme-surface flex flex-col items-center justify-center gap-1.5 rounded-xl border px-3 py-3.5 text-center shadow-xs transition active:scale-[0.97]">
               <span class="format-badge theme-sheet-item theme-text-secondary rounded-md px-2 py-0.5 text-[11px] font-bold tracking-wider">JPG</span>
               <span class="theme-text-primary text-xs font-semibold">JPEG Image</span>
-              <span class="theme-text-secondary text-[10px]">Compact photo</span>
             </button>
 
             <!-- PNG -->
             <button type="button" data-format="png"
-              class="format-card theme-surface flex flex-col items-center justify-center gap-1 rounded-xl border px-3 py-3 text-center shadow-xs transition active:scale-[0.97]">
+              class="format-card theme-surface flex flex-col items-center justify-center gap-1.5 rounded-xl border px-3 py-3.5 text-center shadow-xs transition active:scale-[0.97]">
               <span class="format-badge theme-sheet-item theme-text-secondary rounded-md px-2 py-0.5 text-[11px] font-bold tracking-wider">PNG</span>
               <span class="theme-text-primary text-xs font-semibold">PNG Image</span>
-              <span class="theme-text-secondary text-[10px]">Lossless crisp</span>
             </button>
           </div>
         </div>
@@ -1072,51 +1069,42 @@
           </div>
 
           <div class="space-y-2.5" id="quality-options">
-            <!-- Small (Compressed) -->
+            <!-- Small -->
             <button type="button" data-quality="small"
               class="quality-card theme-surface flex w-full items-center justify-between rounded-xl border px-4 py-3.5 text-left shadow-xs transition">
               <div class="flex items-center gap-3">
                 <span class="quality-radio flex h-5 w-5 items-center justify-center rounded-full border-2 border-slate-400/50">
                   <span class="h-2.5 w-2.5 rounded-full bg-[#0D74E7] opacity-0 transition-opacity"></span>
                 </span>
-                <div>
-                  <div class="theme-text-primary text-sm font-semibold">Small (Compressed)</div>
-                  <div id="quality-desc-small" class="theme-text-secondary text-xs">Best for quick email &amp; messaging</div>
-                </div>
+                <span class="theme-text-primary text-sm font-semibold">Small</span>
               </div>
               <span id="size-est-small" class="theme-sheet-item theme-text-primary rounded-lg px-2.5 py-1 text-xs font-semibold">
                 -- KB
               </span>
             </button>
 
-            <!-- Medium (Balanced) -->
+            <!-- Medium -->
             <button type="button" data-quality="medium"
               class="quality-card flex w-full items-center justify-between rounded-xl border border-[#0D74E7] bg-[#0D74E7]/12 px-4 py-3.5 text-left shadow-xs transition">
               <div class="flex items-center gap-3">
                 <span class="quality-radio flex h-5 w-5 items-center justify-center rounded-full border-2 border-[#0D74E7]">
                   <span class="h-2.5 w-2.5 rounded-full bg-[#0D74E7] opacity-100 transition-opacity"></span>
                 </span>
-                <div>
-                  <div class="theme-text-primary text-sm font-semibold">Medium (Balanced)</div>
-                  <div id="quality-desc-medium" class="theme-text-secondary text-xs">Recommended crisp text &amp; compact size</div>
-                </div>
+                <span class="theme-text-primary text-sm font-semibold">Medium</span>
               </div>
               <span id="size-est-medium" class="rounded-lg bg-[#0D74E7]/20 px-2.5 py-1 text-xs font-semibold text-[#0D74E7]">
                 -- KB
               </span>
             </button>
 
-            <!-- Large (High Quality) -->
+            <!-- Large -->
             <button type="button" data-quality="large"
               class="quality-card theme-surface flex w-full items-center justify-between rounded-xl border px-4 py-3.5 text-left shadow-xs transition">
               <div class="flex items-center gap-3">
                 <span class="quality-radio flex h-5 w-5 items-center justify-center rounded-full border-2 border-slate-400/50">
                   <span class="h-2.5 w-2.5 rounded-full bg-[#0D74E7] opacity-0 transition-opacity"></span>
                 </span>
-                <div>
-                  <div class="theme-text-primary text-sm font-semibold">Large (High Quality)</div>
-                  <div id="quality-desc-large" class="theme-text-secondary text-xs">Maximum detail for printing &amp; archiving</div>
-                </div>
+                <span class="theme-text-primary text-sm font-semibold">Large</span>
               </div>
               <span id="size-est-large" class="theme-sheet-item theme-text-primary rounded-lg px-2.5 py-1 text-xs font-semibold">
                 -- KB
@@ -1139,11 +1127,8 @@
         </button>
         <button id="btn-share-export" type="button"
           class="theme-surface mt-3 hidden w-full items-center justify-center gap-2 rounded-2xl border py-3.5 text-sm font-semibold transition active:scale-[0.98]">
-          <span id="share-btn-label">Share / Save to Files (keeps exact name)</span>
+          <span id="share-btn-label">Share / Save to Files</span>
         </button>
-        <p id="export-helper-note" class="theme-text-muted mt-3 px-2 text-center text-[11px] leading-relaxed">
-          The PDF is saved with exactly the name you typed. If your device shows a number such as &ldquo;(1)&rdquo;, a file with the same name already exists in Downloads &mdash; delete the old one, or use the Save dialog / Share option.
-        </p>
       </div>
     </main>
   </section>
@@ -1156,8 +1141,8 @@
       'use strict';
 
       /* -------------------------------------------------------------------
-       * 1. APPLICATION STATE & NIGHT / DAY THEME MANAGER
-       * ------------------------------------------------------------------- */
+- 1. APPLICATION STATE & NIGHT / DAY THEME MANAGER
+- ------------------------------------------------------------------- */
       const MAX_IMAGE_DIM = 1900;
 
       const savedTheme = (() => {
@@ -1263,8 +1248,8 @@
       applyTheme(state.theme);
 
       /* -------------------------------------------------------------------
-       * 2. SCREEN ROUTING & UTILITIES
-       * ------------------------------------------------------------------- */
+- 2. SCREEN ROUTING & UTILITIES
+- ------------------------------------------------------------------- */
       const screens = {
         1: $('screen-1'),
         2: $('screen-2'),
@@ -1349,8 +1334,8 @@
       }
 
       /* -------------------------------------------------------------------
-       * 3. OPENCV INITIALIZATION & EDGE DETECTION / PERSPECTIVE WARP
-       * ------------------------------------------------------------------- */
+- 3. OPENCV INITIALIZATION & EDGE DETECTION / PERSPECTIVE WARP
+- ------------------------------------------------------------------- */
       window.handleOpenCvReady = function () {
         state.cvReady = true;
         const dot = $('cv-status-dot');
@@ -1520,8 +1505,8 @@
       }
 
       /* -------------------------------------------------------------------
-       * 4. UPGRADED STUDIO-GRADE DOCUMENT CONTRAST & FILTER ENGINE
-       * ------------------------------------------------------------------- */
+- 4. UPGRADED STUDIO-GRADE DOCUMENT CONTRAST & FILTER ENGINE
+- ------------------------------------------------------------------- */
       const bgCache = new WeakMap();
 
       function boxBlurRGBA(d, w, h, r, passes) {
@@ -1947,8 +1932,8 @@
       }
 
       /* -------------------------------------------------------------------
-       * 5. FILE INGESTION & SINGLE / MULTI CAMERA ENGINE
-       * ------------------------------------------------------------------- */
+- 5. FILE INGESTION & SINGLE / MULTI CAMERA ENGINE
+- ------------------------------------------------------------------- */
       function loadFileAsCanvas(file) {
         return new Promise((resolve, reject) => {
           const url = URL.createObjectURL(file);
@@ -2378,8 +2363,8 @@
       });
 
       /* -------------------------------------------------------------------
-       * 6. UPGRADED SCREEN 2: 8-DOT CROP & ROTATE ENGINE WITH LOUPE
-       * ------------------------------------------------------------------- */
+- 6. UPGRADED SCREEN 2: 8-DOT CROP & ROTATE ENGINE WITH LOUPE
+- ------------------------------------------------------------------- */
       const cropCanvas = $('crop-canvas');
       const cropCtx = cropCanvas.getContext('2d');
 
@@ -2956,8 +2941,8 @@
       }
 
       /* -------------------------------------------------------------------
-       * 7. SCREEN 3: BATCH / SINGLE "ADJUST CONTRAST" & FILTER SCREEN
-       * ------------------------------------------------------------------- */
+- 7. SCREEN 3: BATCH / SINGLE "ADJUST CONTRAST" & FILTER SCREEN
+- ------------------------------------------------------------------- */
       const previewCanvas = $('filter-preview-canvas');
 
       function openFilterScreen() {
@@ -3337,8 +3322,8 @@
       });
 
       /* -------------------------------------------------------------------
-       * 8. SCREEN 4: DOCUMENT PAGE LIST, SMOOTH PAGE PREVIEW & 3s UNDO DELETE
-       * ------------------------------------------------------------------- */
+- 8. SCREEN 4: DOCUMENT PAGE LIST, SMOOTH PAGE PREVIEW & 3s UNDO DELETE
+- ------------------------------------------------------------------- */
       function renderPageList() {
         const listEl = $('pages-sortable-list');
         listEl.innerHTML = '';
@@ -3608,8 +3593,8 @@
       });
 
       /* -------------------------------------------------------------------
-       * 9. SCREEN 5: MULTI-FORMAT (PDF, JPG, PNG) EXPORT, DOWNLOAD & SHARE
-       * ------------------------------------------------------------------- */
+- 9. SCREEN 5: MULTI-FORMAT (PDF, JPG, PNG) EXPORT, DOWNLOAD & SHARE
+- ------------------------------------------------------------------- */
       function dataUrlToBlob(dataUrl, mimeType) {
         const base64 = dataUrl.split(',')[1] || '';
         const binary = atob(base64);
@@ -3721,40 +3706,22 @@
           }
         });
 
-        // 2. Update header, extension badge, summary, quality descriptions, buttons & helper text
+        // 2. Update header, extension badge, summary & action button labels
         $('export-header-title').textContent = `Export ${upper}`;
         $('export-ext-badge').textContent = `.${fmt}`;
 
         if (fmt === 'pdf') {
           $('export-page-summary').textContent = `A4 • ${pageCount} ${pageCount === 1 ? 'page' : 'pages'}`;
-          $('quality-desc-small').textContent = 'Best for quick email & messaging';
-          $('quality-desc-medium').textContent = 'Recommended crisp text & compact size';
-          $('quality-desc-large').textContent = 'Maximum detail for printing & archiving';
           $('download-btn-label').textContent = 'Save / Download PDF';
-          $('share-btn-label').textContent = 'Share / Save to Files (keeps exact name)';
-          $('export-helper-note').innerHTML =
-            'The PDF is saved with exactly the name you typed. If your device shows a number such as &ldquo;(1)&rdquo;, a file with the same name already exists in Downloads &mdash; delete the old one, or use the Save dialog / Share option.';
+          $('share-btn-label').textContent = 'Share / Save to Files';
         } else {
           const pluralSuffix = pageCount > 1 ? ` (${pageCount} ${upper}s)` : '';
           $('export-page-summary').textContent = `${upper} • ${pageCount} ${pageCount === 1 ? 'image' : 'images'}`;
-          if (fmt === 'png') {
-            $('quality-desc-small').textContent = 'Compact lossless PNG (1000px max edge)';
-            $('quality-desc-medium').textContent = 'Balanced lossless PNG (1450px max edge)';
-            $('quality-desc-large').textContent = 'Full-resolution lossless PNG';
-          } else {
-            $('quality-desc-small').textContent = 'Best for quick email & messaging';
-            $('quality-desc-medium').textContent = 'Recommended crisp text & compact size';
-            $('quality-desc-large').textContent = 'Maximum detail for printing & archiving';
-          }
           $('download-btn-label').textContent = `Save / Download ${upper}${pluralSuffix}`;
           $('share-btn-label').textContent =
             pageCount > 1
               ? `Share / Save ${pageCount} ${upper} Images`
-              : 'Share / Save to Files (keeps exact name)';
-          $('export-helper-note').innerHTML =
-            pageCount > 1
-              ? `Each page is exported as a separate ${upper} image named &ldquo;&lt;Name&gt; - Page 1.${fmt}&rdquo;, &ldquo;Page 2.${fmt}&rdquo;, etc.`
-              : `The ${upper} image is saved with exactly the name you typed. If your device shows a number such as &ldquo;(1)&rdquo;, a file with the same name already exists in Downloads &mdash; delete the old one, or use the Save dialog / Share option.`;
+              : 'Share / Save to Files';
         }
 
         // 3. Populate size badges from prepared cache
@@ -3838,8 +3805,8 @@
       });
 
       /* -------------------------------------------------------------------
-       * STRICT FILE NAME EXPORT: exact name typed by user for PDF, JPG & PNG
-       * ------------------------------------------------------------------- */
+- STRICT FILE NAME EXPORT: exact name typed by user for PDF, JPG & PNG
+- ------------------------------------------------------------------- */
       function exactBaseName() {
         let n = ($('input-export-filename').value || '');
         n = n.replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '_')
